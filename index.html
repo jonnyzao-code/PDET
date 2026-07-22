@@ -1292,208 +1292,195 @@
             mostrarMensaje('✅ Reporte enviado a Control Interno', 'success');
         }
 
-       // ============================================================
-// FUNCIONES DE SINCRONIZACIÓN CON GOOGLE SHEETS - VERSIÓN CORREGIDA
-// ============================================================
+        // ============================================================
+        // FUNCIONES DE SINCRONIZACIÓN CON GOOGLE SHEETS - VERSIÓN CORREGIDA
+        // ============================================================
 
-// Función para obtener datos ya existentes en Google Sheets
-async function obtenerDatosExistentes() {
-    try {
-        const response = await fetch(`${API_URL}/api/sheets/get-data`);
-        if (!response.ok) {
-            console.warn('⚠️ No se pudieron obtener datos existentes');
-            return { proyectos: [], evaluaciones: [] };
-        }
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('❌ Error obteniendo datos existentes:', error);
-        return { proyectos: [], evaluaciones: [] };
-    }
-}
-
-// Función para filtrar SOLO los datos nuevos
-function filtrarNuevosDatos(datosLocales, datosExistentes, keyField) {
-    // Crear un Set con los identificadores de los datos existentes
-    const existingKeys = new Set();
-    datosExistentes.forEach(item => {
-        const key = item[keyField] || '';
-        if (key) existingKeys.add(key);
-    });
-    
-    // Filtrar los datos locales que NO están en los existentes
-    const nuevos = datosLocales.filter(item => {
-        const key = item[keyField] || '';
-        return key && !existingKeys.has(key);
-    });
-    
-    return nuevos;
-}
-
-// Función principal de sincronización (cuando se hace clic en el botón)
-async function sincronizarConGoogleSheets(mostrarMensajeExito = true) {
-    // Verificar que hay datos para sincronizar
-    if (baseDeDatosProyectos.length === 0 && evaluaciones.length === 0) {
-        if (mostrarMensajeExito) {
-            mostrarMensaje('⚠️ No hay datos para sincronizar', 'error');
-        }
-        return;
-    }
-
-    if (isSyncing) return;
-    isSyncing = true;
-    const btn = document.getElementById('btnSyncSheets');
-    if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<span class="sync-spinner"></span> Sincronizando...';
-    }
-
-    try {
-        // 1. Obtener datos ya existentes en Google Sheets
-        const existentes = await obtenerDatosExistentes();
-        
-        // 2. Filtrar SOLO los proyectos nuevos
-        const proyectosNuevos = filtrarNuevosDatos(
-            baseDeDatosProyectos,
-            existentes.proyectos || [],
-            'bpin'
-        );
-        
-        // 3. Filtrar SOLO las evaluaciones nuevas
-        const evaluacionesNuevas = filtrarNuevosDatos(
-            evaluaciones,
-            existentes.evaluaciones || [],
-            'fecha'
-        );
-        
-        // 4. Si no hay datos nuevos, mostrar mensaje y salir
-        if (proyectosNuevos.length === 0 && evaluacionesNuevas.length === 0) {
-            if (mostrarMensajeExito) {
-                mostrarMensaje('📋 No hay datos nuevos para sincronizar', 'info');
+        // Función para obtener datos ya existentes en Google Sheets
+        async function obtenerDatosExistentes() {
+            try {
+                const response = await fetch(`${API_URL}/api/sheets/get-data`);
+                if (!response.ok) {
+                    console.warn('⚠️ No se pudieron obtener datos existentes');
+                    return { proyectos: [], evaluaciones: [] };
+                }
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('❌ Error obteniendo datos existentes:', error);
+                return { proyectos: [], evaluaciones: [] };
             }
+        }
+
+        // Función para filtrar SOLO los datos nuevos
+        function filtrarNuevosDatos(datosLocales, datosExistentes, keyField) {
+            const existingKeys = new Set();
+            datosExistentes.forEach(item => {
+                const key = item[keyField] || '';
+                if (key) existingKeys.add(key);
+            });
+            
+            const nuevos = datosLocales.filter(item => {
+                const key = item[keyField] || '';
+                return key && !existingKeys.has(key);
+            });
+            
+            return nuevos;
+        }
+
+        // Función principal de sincronización (cuando se hace clic en el botón)
+        async function sincronizarConGoogleSheets(mostrarMensajeExito = true) {
+            if (baseDeDatosProyectos.length === 0 && evaluaciones.length === 0) {
+                if (mostrarMensajeExito) {
+                    mostrarMensaje('⚠️ No hay datos para sincronizar', 'error');
+                }
+                return;
+            }
+
+            if (isSyncing) return;
+            isSyncing = true;
+            const btn = document.getElementById('btnSyncSheets');
             if (btn) {
-                btn.innerHTML = '✅ Sin cambios';
-                setTimeout(() => {
-                    btn.innerHTML = '<span>🔄</span> Sincronizar con Google Sheets';
-                    btn.disabled = false;
-                    isSyncing = false;
-                }, 2000);
+                btn.disabled = true;
+                btn.innerHTML = '<span class="sync-spinner"></span> Sincronizando...';
             }
-            return;
-        }
-        
-        // 5. Enviar SOLO los datos nuevos
-        const response = await fetch(`${API_URL}/api/sheets/append`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                proyectos: proyectosNuevos,
-                evaluaciones: evaluacionesNuevas,
-                circular: circularActual || null
-            })
-        });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Error ${response.status}: ${errorText}`);
-        }
+            try {
+                const existentes = await obtenerDatosExistentes();
+                
+                const proyectosNuevos = filtrarNuevosDatos(
+                    baseDeDatosProyectos,
+                    existentes.proyectos || [],
+                    'bpin'
+                );
+                
+                const evaluacionesNuevas = filtrarNuevosDatos(
+                    evaluaciones,
+                    existentes.evaluaciones || [],
+                    'fecha'
+                );
+                
+                if (proyectosNuevos.length === 0 && evaluacionesNuevas.length === 0) {
+                    if (mostrarMensajeExito) {
+                        mostrarMensaje('📋 No hay datos nuevos para sincronizar', 'info');
+                    }
+                    if (btn) {
+                        btn.innerHTML = '✅ Sin cambios';
+                        setTimeout(() => {
+                            btn.innerHTML = '<span>🔄</span> Sincronizar con Google Sheets';
+                            btn.disabled = false;
+                            isSyncing = false;
+                        }, 2000);
+                    }
+                    return;
+                }
+                
+                const response = await fetch(`${API_URL}/api/sheets/append`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        proyectos: proyectosNuevos,
+                        evaluaciones: evaluacionesNuevas,
+                        circular: circularActual || null
+                    })
+                });
 
-        const result = await response.json();
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Error ${response.status}: ${errorText}`);
+                }
 
-        if (result.success) {
-            if (mostrarMensajeExito) {
-                const msg = `✅ Datos sincronizados: ${proyectosNuevos.length} proyectos, ${evaluacionesNuevas.length} evaluaciones nuevas`;
-                mostrarMensaje(msg, 'success');
+                const result = await response.json();
+
+                if (result.success) {
+                    if (mostrarMensajeExito) {
+                        const msg = `✅ Datos sincronizados: ${proyectosNuevos.length} proyectos, ${evaluacionesNuevas.length} evaluaciones nuevas`;
+                        mostrarMensaje(msg, 'success');
+                    }
+                    registrarLog(currentSecretaria, currentUser, `🔄 Sincronización: ${proyectosNuevos.length} proyectos, ${evaluacionesNuevas.length} evaluaciones nuevas`);
+                } else {
+                    if (mostrarMensajeExito) {
+                        mostrarMensaje(`❌ Error: ${result.error || 'No se pudo sincronizar'}`, 'error');
+                    }
+                }
+                
+                if (btn) {
+                    btn.innerHTML = '✅ Sincronizado';
+                    setTimeout(() => {
+                        btn.innerHTML = '<span>🔄</span> Sincronizar con Google Sheets';
+                        btn.disabled = false;
+                        isSyncing = false;
+                    }, 3000);
+                }
+                
+            } catch (error) {
+                console.error('❌ Error en sincronización:', error);
+                if (mostrarMensajeExito) {
+                    mostrarMensaje(`❌ Error: ${error.message}`, 'error');
+                }
+                if (btn) {
+                    btn.innerHTML = '❌ Error';
+                    setTimeout(() => {
+                        btn.innerHTML = '<span>🔄</span> Sincronizar con Google Sheets';
+                        btn.disabled = false;
+                        isSyncing = false;
+                    }, 3000);
+                }
             }
-            registrarLog(currentSecretaria, currentUser, `🔄 Sincronización: ${proyectosNuevos.length} proyectos, ${evaluacionesNuevas.length} evaluaciones nuevas`);
-        } else {
-            if (mostrarMensajeExito) {
-                mostrarMensaje(`❌ Error: ${result.error || 'No se pudo sincronizar'}`, 'error');
+        }
+
+        // Función para sincronización automática silenciosa (sin mensajes)
+        async function sincronizarAutomatico() {
+            try {
+                if (baseDeDatosProyectos.length === 0 && evaluaciones.length === 0) {
+                    return;
+                }
+                
+                const existentes = await obtenerDatosExistentes();
+                
+                const proyectosNuevos = filtrarNuevosDatos(
+                    baseDeDatosProyectos,
+                    existentes.proyectos || [],
+                    'bpin'
+                );
+                
+                const evaluacionesNuevas = filtrarNuevosDatos(
+                    evaluaciones,
+                    existentes.evaluaciones || [],
+                    'fecha'
+                );
+                
+                if (proyectosNuevos.length === 0 && evaluacionesNuevas.length === 0) {
+                    console.log('📋 No hay datos nuevos para sincronizar automáticamente');
+                    return;
+                }
+                
+                console.log(`📦 Enviando automáticamente: ${proyectosNuevos.length} proyectos, ${evaluacionesNuevas.length} evaluaciones`);
+                
+                const response = await fetch(`${API_URL}/api/sheets/append`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        proyectos: proyectosNuevos,
+                        evaluaciones: evaluacionesNuevas,
+                        circular: circularActual || null
+                    })
+                });
+                
+                if (response.ok) {
+                    console.log('✅ Sincronización automática exitosa');
+                    registrarLog(currentSecretaria || 'SISTEMA', currentUser || 'AUTOMATICO', `🔄 Auto-sincronización: ${proyectosNuevos.length} proyectos, ${evaluacionesNuevas.length} evaluaciones`);
+                } else {
+                    console.error('❌ Error en sincronización automática:', await response.text());
+                }
+            } catch (error) {
+                console.error('❌ Error en sincronización automática:', error);
             }
         }
-        
-        if (btn) {
-            btn.innerHTML = '✅ Sincronizado';
-            setTimeout(() => {
-                btn.innerHTML = '<span>🔄</span> Sincronizar con Google Sheets';
-                btn.disabled = false;
-                isSyncing = false;
-            }, 3000);
-        }
-        
-    } catch (error) {
-        console.error('❌ Error en sincronización:', error);
-        if (mostrarMensajeExito) {
-            mostrarMensaje(`❌ Error: ${error.message}`, 'error');
-        }
-        if (btn) {
-            btn.innerHTML = '❌ Error';
-            setTimeout(() => {
-                btn.innerHTML = '<span>🔄</span> Sincronizar con Google Sheets';
-                btn.disabled = false;
-                isSyncing = false;
-            }, 3000);
-        }
-    }
-}
 
-// Función para sincronización automática silenciosa (sin mensajes)
-async function sincronizarAutomatico() {
-    try {
-        if (baseDeDatosProyectos.length === 0 && evaluaciones.length === 0) {
-            return;
-        }
-        
-        // 1. Obtener datos ya existentes en Google Sheets
-        const existentes = await obtenerDatosExistentes();
-        
-        // 2. Filtrar SOLO los proyectos nuevos
-        const proyectosNuevos = filtrarNuevosDatos(
-            baseDeDatosProyectos,
-            existentes.proyectos || [],
-            'bpin'
-        );
-        
-        // 3. Filtrar SOLO las evaluaciones nuevas
-        const evaluacionesNuevas = filtrarNuevosDatos(
-            evaluaciones,
-            existentes.evaluaciones || [],
-            'fecha'
-        );
-        
-        // 4. Si no hay datos nuevos, no hacer nada
-        if (proyectosNuevos.length === 0 && evaluacionesNuevas.length === 0) {
-            console.log('📋 No hay datos nuevos para sincronizar automáticamente');
-            return;
-        }
-        
-        console.log(`📦 Enviando automáticamente: ${proyectosNuevos.length} proyectos, ${evaluacionesNuevas.length} evaluaciones`);
-        
-        // 5. Enviar SOLO los datos nuevos
-        const response = await fetch(`${API_URL}/api/sheets/append`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                proyectos: proyectosNuevos,
-                evaluaciones: evaluacionesNuevas,
-                circular: circularActual || null
-            })
-        });
-        
-        if (response.ok) {
-            console.log('✅ Sincronización automática exitosa');
-            registrarLog(currentSecretaria || 'SISTEMA', currentUser || 'AUTOMATICO', `🔄 Auto-sincronización: ${proyectosNuevos.length} proyectos, ${evaluacionesNuevas.length} evaluaciones`);
-        } else {
-            console.error('❌ Error en sincronización automática:', await response.text());
-        }
-    } catch (error) {
-        console.error('❌ Error en sincronización automática:', error);
-    }
-}
-
-// ============================================================
-// FIN DE LAS FUNCIONES DE SINCRONIZACIÓN
-// ============================================================
+        // ============================================================
+        // FIN DE LAS FUNCIONES DE SINCRONIZACIÓN
+        // ============================================================
 
         // ============================================================
         // FUNCIONES DE ARCHIVOS
@@ -1789,7 +1776,6 @@ async function sincronizarAutomatico() {
             guardarDatos();
             mostrarMensaje('✅ Proyecto registrado', 'success');
             
-            // Sincronizar automáticamente después de guardar
             setTimeout(() => {
                 sincronizarAutomatico();
             }, 500);
@@ -1845,7 +1831,6 @@ async function sincronizarAutomatico() {
                 guardarDatos();
                 mostrarMensaje('🗑️ Proyecto eliminado', 'info');
                 
-                // Sincronizar automáticamente después de eliminar
                 setTimeout(() => {
                     sincronizarAutomatico();
                 }, 500);
@@ -2068,7 +2053,7 @@ async function sincronizarAutomatico() {
                 if (currentUser) {
                     sincronizarAutomatico();
                 }
-            }, 300000); // 300000 ms = 5 minutos
+            }, 300000);
             
             setInterval(verificarPlazo, 60000);
         });
