@@ -1,0 +1,1914 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Integral PDET - Gobernación del Putumayo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+            min-height: 100vh;
+        }
+        .gradient-card {
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+        }
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+        .shadow-hover:hover {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+        .badge-cumplio {
+            background: #10b981;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .badge-no-cumplio {
+            background: #ef4444;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .badge-parcial {
+            background: #f59e0b;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .badge-planeacion {
+            background: #1e3a8a;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .progress-bar {
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #06b6d4);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .notification {
+            animation: slideIn 0.3s ease-out;
+        }
+        .tab-active {
+            background: #1e3a8a;
+            color: white;
+        }
+        .tab-inactive {
+            color: #6b7280;
+        }
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid #d4d4d4;
+            border-bottom: none;
+            border-top: none;
+            z-index: 99;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 150px;
+            overflow-y: auto;
+            background-color: #fff;
+            border-radius: 0 0 4px 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .autocomplete-items div {
+            padding: 6px 10px;
+            cursor: pointer;
+            background-color: #fff;
+            border-bottom: 1px solid #d4d4d4;
+            font-size: 11px;
+            font-family: monospace;
+        }
+        .autocomplete-items div:hover {
+            background-color: #e9e9e9;
+        }
+        .autocomplete-container {
+            position: relative;
+        }
+        .file-upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .file-upload-area:hover {
+            border-color: #3b82f6;
+            background: #f8fafc;
+        }
+        .file-upload-area.dragover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        .btn-sync {
+            background: linear-gradient(135deg, #059669, #10b981);
+            transition: all 0.3s ease;
+        }
+        .btn-sync:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);
+        }
+        .btn-sync:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .sync-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #fff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 text-gray-800 font-sans">
+
+    <!-- PANTALLA DE LOGIN -->
+    <div id="loginSection" class="max-w-md mx-auto my-20 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-900 to-teal-800 p-6 text-white text-center border-b-4 border-yellow-500">
+            <h2 class="text-xl font-black uppercase tracking-wider">Gobernación del Putumayo</h2>
+            <p class="text-xs opacity-80 mt-1">Sistema Integral de Seguimiento y Evaluación PDET</p>
+        </div>
+        <form onsubmit="procesarLogin(event)" class="p-6 space-y-4">
+            <div>
+                <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Usuario</label>
+                <input type="text" id="loginUser" required placeholder="Usuario" class="w-full p-2.5 border-2 border-gray-300 rounded-lg outline-none focus:border-teal-600 transition-all font-mono">
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Contraseña</label>
+                <input type="password" id="loginPass" required placeholder="••••••••" class="w-full p-2.5 border-2 border-gray-300 rounded-lg outline-none focus:border-teal-600 transition-all">
+            </div>
+            <div id="loginError" class="text-xs text-red-600 font-bold hidden">⚠️ Credenciales incorrectas.</div>
+            <button type="submit" class="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-lg transition-all shadow-md">
+                Ingresar al Sistema
+            </button>
+        </form>
+    </div>
+
+    <!-- PANEL PRINCIPAL -->
+    <div id="mainDashboard" class="max-w-7xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden hidden">
+        <!-- Encabezado -->
+        <div class="bg-gradient-to-r from-blue-900 to-teal-700 p-6 text-white border-b-4 border-yellow-500 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-extrabold tracking-wider uppercase">Gobernación del Putumayo</h1>
+                <p class="text-sm opacity-90 mt-1">Sistema de Seguimiento y Evaluación - Acuerdo Final de Paz (3,440 Iniciativas PDET)</p>
+            </div>
+            <div class="flex gap-3 items-center flex-wrap">
+                <div class="bg-blue-950/50 p-3 rounded-xl border border-teal-500/30 text-right text-xs">
+                    <div>Sesión: <span id="sessionRole" class="font-bold text-yellow-400"></span></div>
+                    <div>Usuario: <span id="sessionUser" class="font-mono text-teal-300"></span></div>
+                    <div id="sessionSecDisplay" class="text-teal-300 text-[10px]">Secretaría: <span id="sessionSec" class="font-mono"></span></div>
+                    <button onclick="cerrarSesion()" class="mt-1.5 text-[10px] bg-red-600 px-2 py-0.5 rounded font-bold hover:bg-red-700 transition-all">Cerrar Sesión</button>
+                </div>
+                <div class="relative">
+                    <button onclick="toggleNotificaciones()" class="bg-blue-950/50 p-2 rounded-xl border border-teal-500/30 hover:bg-blue-900/50 transition-all">
+                        <span class="text-xl">🔔</span>
+                        <span id="notifCount" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center font-bold hidden">0</span>
+                    </button>
+                    <div id="notifPanel" class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 hidden z-50 max-h-96 overflow-y-auto">
+                        <div class="p-3 border-b border-gray-200 font-bold text-sm">Notificaciones</div>
+                        <div id="notifList" class="p-2 space-y-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs de Navegación -->
+        <div class="border-b border-gray-200 bg-gray-50 px-6">
+            <nav class="flex gap-1 -mb-px flex-wrap">
+                <button onclick="cambiarTab('proyectos')" id="tabProyectos" class="py-3 px-4 text-sm font-medium border-b-2 border-transparent hover:border-blue-500 transition-all tab-active">
+                    📋 Proyectos
+                </button>
+                <button onclick="cambiarTab('circular')" id="tabCircular" class="py-3 px-4 text-sm font-medium border-b-2 border-transparent hover:border-blue-500 transition-all tab-inactive">
+                    📄 Circular
+                </button>
+                <button onclick="cambiarTab('evaluacion')" id="tabEvaluacion" class="py-3 px-4 text-sm font-medium border-b-2 border-transparent hover:border-blue-500 transition-all tab-inactive">
+                    📊 Evaluación
+                </button>
+                <button onclick="cambiarTab('reportes')" id="tabReportes" class="py-3 px-4 text-sm font-medium border-b-2 border-transparent hover:border-blue-500 transition-all tab-inactive">
+                    📈 Reportes
+                </button>
+                <button onclick="cambiarTab('archivos')" id="tabArchivos" class="py-3 px-4 text-sm font-medium border-b-2 border-transparent hover:border-blue-500 transition-all tab-inactive">
+                    📎 Archivos
+                </button>
+            </nav>
+        </div>
+
+        <!-- Contenido de Tabs -->
+        <div class="p-6">
+            
+            <!-- TAB 1: PROYECTOS -->
+            <div id="contentProyectos" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="gradient-card p-5 rounded-xl border border-gray-200 shadow-sm shadow-hover">
+                        <h2 class="text-base font-bold text-blue-950 mb-3 border-b pb-1.5 flex items-center gap-2">
+                            <span>📝</span> <span id="formTitle">Registrar Proyecto</span>
+                        </h2>
+                        <form id="pdetForm" onsubmit="guardarProyecto(event)" class="space-y-3.5">
+                            <input type="hidden" id="editIndex" value="">
+                            
+                            <div>
+                                <label class="block text-[11px] font-bold uppercase text-gray-600 mb-0.5">Punto del Acuerdo</label>
+                                <select id="puntoAcuerdo" onchange="togglePdetFields()" class="w-full p-2 border border-gray-300 rounded-md bg-white text-xs">
+                                    <option value="Punto 1">Punto 1: Reforma Rural Integral (RRI)</option>
+                                    <option value="Punto 2">Punto 2: Participación Política</option>
+                                    <option value="Punto 3">Punto 3: Fin del Conflicto</option>
+                                    <option value="Punto 4">Punto 4: Solución al Problema de Drogas Ilícitas</option>
+                                    <option value="Punto 5">Punto 5: Acuerdo sobre las Víctimas</option>
+                                    <option value="Punto 6">Punto 6: Implementación, Verificación y Refrendación</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-bold uppercase text-gray-600 mb-0.5">Código BPIN</label>
+                                <input type="text" id="bpin" placeholder="Ej: 2026860010023" required class="w-full p-2 border border-gray-300 rounded-md text-xs font-mono">
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-bold uppercase text-gray-600 mb-0.5">Proyecto de Inversión</label>
+                                <textarea id="nombreProyecto" placeholder="Descripción del proyecto..." required rows="2" class="w-full p-2 border border-gray-300 rounded-md text-xs"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-bold uppercase text-gray-600 mb-0.5">Secretaría Responsable</label>
+                                <select id="secretaria" class="w-full p-2 border border-gray-300 rounded-md bg-white text-xs">
+                                    <option value="PLANEACION">Secretaría de Planeación</option>
+                                    <option value="HACIENDA">Secretaría de Hacienda</option>
+                                    <option value="GOBIERNO">Secretaría de Gobierno</option>
+                                    <option value="EDUCACION">Secretaría de Educación</option>
+                                    <option value="SALUD">Secretaría de Salud</option>
+                                    <option value="INFRAESTRUCTURA">Secretaría de Infraestructura</option>
+                                    <option value="DESARROLLO_SOCIAL">Secretaría de Desarrollo Social</option>
+                                    <option value="DESARROLLO_AGROPECUARIO">Secretaría de Desarrollo Agropecuario</option>
+                                    <option value="PRODUCTIVIDAD">Secretaría de Productividad y Competitividad</option>
+                                    <option value="INDERCULTURA">Instituto de Deporte y Cultura</option>
+                                </select>
+                            </div>
+
+                            <div id="pdetFields" class="space-y-3 border-t pt-3 border-gray-200 bg-teal-50/50 p-2 rounded-lg" style="opacity: 0.4;">
+                                <span class="text-[10px] font-black text-teal-800 tracking-wider block">REQUERIMIENTOS PDET</span>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-gray-600 mb-0.5">Pilar PDET</label>
+                                    <select id="pilarPdet" class="w-full p-1.5 border border-teal-300 rounded-md bg-white text-xs" disabled>
+                                        <option value="Pilar 1: Ordenamiento de Propiedad">Pilar 1: Ordenamiento Social de la Propiedad Rural</option>
+                                        <option value="Pilar 2: Infraestructura">Pilar 2: Infraestructura y Adecuación de Tierras</option>
+                                        <option value="Pilar 3: Salud Rural">Pilar 3: Salud Rural</option>
+                                        <option value="Pilar 4: Educación Rural">Pilar 4: Educación Rural y Primera Infancia</option>
+                                        <option value="Pilar 5: Vivienda y Agua">Pilar 5: Vivienda Rural, Agua Potable y Saneamiento</option>
+                                        <option value="Pilar 6: Reactivación Económica">Pilar 6: Reactivación Económica y Producción Agropecuaria</option>
+                                        <option value="Pilar 7: Seguridad Alimentaria">Pilar 7: Sistema para la Garantía Progresiva del Derecho a la Alimentación</option>
+                                        <option value="Pilar 8: Reconciliación y Paz">Pilar 8: Reconciliación, Convivencia y Construcción de Paz</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-gray-600 mb-0.5">Código Iniciativa PDET</label>
+                                    <div class="autocomplete-container">
+                                        <input type="text" id="codigoIniciativa" placeholder="Ej: 1186568253771" class="w-full p-1.5 border border-teal-300 rounded-md text-xs font-mono" disabled oninput="buscarCodigoPDET(this.value)">
+                                        <div id="autocomplete-list" class="autocomplete-items"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="border-t pt-3 border-gray-200 space-y-3">
+                                <span class="text-[10px] font-black text-purple-800 tracking-wider block">💰 PRESUPUESTO Y EJECUCIÓN</span>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-gray-600 mb-0.5">Presupuesto Invertido (COP)</label>
+                                    <input type="number" id="presupuesto" placeholder="Ej: 500000000" class="w-full p-1.5 border border-purple-300 rounded-md text-xs font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-gray-600 mb-0.5">Fuentes de Financiación</label>
+                                    <select id="fuentes" class="w-full p-1.5 border border-purple-300 rounded-md bg-white text-xs">
+                                        <option value="SGP - Sistema General de Participaciones">SGP - Sistema General de Participaciones</option>
+                                        <option value="SGR - Sistema General de Regalías">SGR - Sistema General de Regalías</option>
+                                        <option value="Presupuesto Nacional">Presupuesto Nacional</option>
+                                        <option value="Recursos Propios Departamentales">Recursos Propios Departamentales</option>
+                                        <option value="Cooperación Internacional">Cooperación Internacional</option>
+                                        <option value="Otra Fuente">Otra Fuente</option>
+                                    </select>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-[10px] font-bold uppercase text-gray-600 mb-0.5">¿Ejecutado?</label>
+                                        <select id="ejecutado" class="w-full p-1.5 border border-purple-300 rounded-md bg-white text-xs">
+                                            <option value="No">No</option>
+                                            <option value="Sí">Sí</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold uppercase text-gray-600 mb-0.5">% Ejecución</label>
+                                        <input type="number" id="porcentajeEjecucion" placeholder="0-100" min="0" max="100" class="w-full p-1.5 border border-purple-300 rounded-md text-xs font-mono">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-2 mt-2">
+                                <button type="submit" class="flex-1 py-2 bg-blue-900 text-white font-bold rounded-md text-xs hover:bg-blue-950 transition-all">
+                                    Guardar Registro
+                                </button>
+                                <button type="button" onclick="cancelarEdicion()" id="btnCancelarEdicion" class="hidden px-3 bg-gray-300 text-gray-700 font-bold rounded-md text-xs hover:bg-gray-400 transition-all">
+                                    Cancelar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="bg-blue-50 border-l-4 border-blue-600 p-3 rounded-r-xl shadow-sm">
+                            <span class="block text-[10px] text-blue-700 font-bold uppercase">Proyectos</span>
+                            <span id="totalProyectos" class="text-xl font-black text-blue-950">0</span>
+                        </div>
+                        <div class="bg-teal-50 border-l-4 border-teal-600 p-3 rounded-r-xl shadow-sm">
+                            <span class="block text-[10px] text-teal-700 font-bold uppercase">Metas PDET</span>
+                            <span id="totalIniciativasPdet" class="text-xl font-black text-teal-950">0</span>
+                        </div>
+                        <div class="bg-purple-50 border-l-4 border-purple-600 p-3 rounded-r-xl shadow-sm">
+                            <span class="block text-[10px] text-purple-700 font-bold uppercase">Áreas Activas</span>
+                            <span id="totalSecretarias" class="text-xl font-black text-purple-950">0</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                        <div class="bg-gray-50 p-3.5 border-b border-gray-200 flex justify-between items-center flex-wrap gap-2">
+                            <h3 class="text-xs font-black uppercase text-gray-700">Consolidado de Proyectos</h3>
+                            <div class="flex gap-2 flex-wrap">
+                                <button onclick="exportarExcel()" class="bg-emerald-600 text-white px-3 py-1.5 rounded-md text-xs font-bold hover:bg-emerald-700 transition-all">
+                                    📊 Exportar Excel
+                                </button>
+                                <button onclick="sincronizarConGoogleSheets()" id="btnSyncSheets" class="btn-sync text-white px-4 py-1.5 rounded-md text-xs font-bold flex items-center gap-2">
+                                    <span>🔄</span> Sincronizar con Google Sheets
+                                </button>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto max-h-64">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-900 text-white uppercase text-[10px] tracking-wider sticky top-0">
+                                        <th class="p-2.5">BPIN</th>
+                                        <th class="p-2.5">Secretaría</th>
+                                        <th class="p-2.5">Presupuesto</th>
+                                        <th class="p-2.5">% Ejec.</th>
+                                        <th class="p-2.5">Estado</th>
+                                        <th class="p-2.5 text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaCuerpo" class="divide-y divide-gray-100"></tbody>
+                            </table>
+                        </div>
+                        <div id="mensajeVacio" class="p-6 text-center text-gray-400 italic text-xs">No hay proyectos registrados en el sistema.</div>
+                    </div>
+
+                    <div class="bg-gray-900 text-gray-100 rounded-xl border border-gray-800 overflow-hidden shadow-md">
+                        <div class="bg-gray-950 p-3 border-b border-gray-800 flex justify-between items-center">
+                            <h3 class="text-xs font-black uppercase text-yellow-500 tracking-wider flex items-center gap-1.5">
+                                <span>🛡️</span> Historial de Auditoría
+                            </h3>
+                        </div>
+                        <div id="logCambios" class="p-3 font-mono text-[11px] space-y-1.5 max-h-48 overflow-y-auto bg-black/40">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: CIRCULAR -->
+            <div id="contentCircular" class="hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div id="circularGestion" class="gradient-card p-6 rounded-xl border border-gray-200">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-bold text-blue-950 flex items-center gap-2">
+                                <span>📄</span> Gestión de Circular
+                            </h2>
+                            <span id="permisoPlaneacionBadge" class="badge-planeacion text-xs">🔒 Solo Planeación</span>
+                        </div>
+                        
+                        <div id="circularForm" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Número de Circular</label>
+                                <input type="text" id="numCircular" placeholder="Ej: CIRCULAR-001-2026" class="w-full p-2 border border-gray-300 rounded-md text-sm font-mono">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Fecha de Emisión</label>
+                                <input type="date" id="fechaCircular" class="w-full p-2 border border-gray-300 rounded-md text-sm">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Asunto</label>
+                                <input type="text" id="asuntoCircular" placeholder="Asunto de la circular..." class="w-full p-2 border border-gray-300 rounded-md text-sm">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Descripción</label>
+                                <textarea id="descCircular" rows="3" placeholder="Descripción detallada de la circular..." class="w-full p-2 border border-gray-300 rounded-md text-sm"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Fecha Límite de Carga</label>
+                                <input type="datetime-local" id="fechaLimite" class="w-full p-2 border border-gray-300 rounded-md text-sm">
+                            </div>
+
+                            <div id="adminCircularArea">
+                                <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Adjuntar Circular (PDF)</label>
+                                <div class="file-upload-area" onclick="document.getElementById('fileCircular').click()">
+                                    <div class="text-sm text-gray-500">
+                                        <span class="text-2xl block">📎</span>
+                                        <span>Haz clic para seleccionar o arrastra el archivo PDF</span>
+                                    </div>
+                                    <input type="file" id="fileCircular" accept=".pdf" class="hidden" onchange="cargarCircular(this.files[0])">
+                                </div>
+                                <div id="circularCargada" class="hidden mt-2 p-2 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700 flex items-center gap-2">
+                                    <span>✅</span>
+                                    <span id="nombreCircular">Circular_cargada.pdf</span>
+                                    <button onclick="eliminarCircular()" class="text-red-500 hover:text-red-700 ml-auto">✕</button>
+                                </div>
+                            </div>
+
+                            <button id="btnPublicarCircular" onclick="guardarCircular()" class="w-full py-2.5 bg-blue-900 text-white font-bold rounded-lg hover:bg-blue-950 transition-all">
+                                Publicar Circular
+                            </button>
+                        </div>
+
+                        <div id="msgNoPlaneacion" class="hidden p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-700">
+                            ⚠️ Solo la Secretaría de Planeación puede publicar y modificar circulares. 
+                            Usted está visualizando la circular vigente.
+                        </div>
+                    </div>
+
+                    <div class="gradient-card p-6 rounded-xl border border-gray-200">
+                        <h2 class="text-lg font-bold text-blue-950 mb-4 flex items-center gap-2">
+                            <span>👁️</span> Circular Vigente
+                        </h2>
+                        <div id="circularVigente" class="space-y-3">
+                            <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <span class="text-xs text-gray-500">Número</span>
+                                        <p id="viewNumCircular" class="font-bold text-lg text-blue-900">-</p>
+                                    </div>
+                                    <span id="viewFechaCircular" class="text-xs text-gray-500">-</span>
+                                </div>
+                                <div class="mt-2">
+                                    <span class="text-xs text-gray-500">Asunto</span>
+                                    <p id="viewAsuntoCircular" class="font-semibold text-gray-700">-</p>
+                                </div>
+                                <div class="mt-2">
+                                    <span class="text-xs text-gray-500">Descripción</span>
+                                    <p id="viewDescCircular" class="text-sm text-gray-600">-</p>
+                                </div>
+                                <div class="mt-2 flex justify-between items-center">
+                                    <span class="text-xs text-gray-500">Fecha límite: <span id="viewFechaLimite" class="font-mono">-</span></span>
+                                    <span id="viewEstadoCircular" class="badge-cumplio">Vigente</span>
+                                </div>
+                                <div class="mt-3 pt-2 border-t border-gray-200">
+                                    <span class="text-xs text-gray-500">Archivo adjunto:</span>
+                                    <div id="viewArchivoCircular" class="mt-1">
+                                        <span class="text-gray-400 text-sm">No hay archivo adjunto</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-xs text-gray-400 text-center">
+                                Publicada por: <span id="viewPublicadaPor">-</span> | <span id="viewPublicadaFecha">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: EVALUACIÓN -->
+            <div id="contentEvaluacion" class="hidden">
+                <div id="evalPlaneacionOnly" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="gradient-card p-6 rounded-xl border border-gray-200">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-bold text-blue-950 flex items-center gap-2">
+                                <span>📊</span> Evaluación de Dependencias
+                            </h2>
+                            <span class="badge-planeacion text-xs">🔒 Solo Planeación</span>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Seleccionar Secretaría</label>
+                                <select id="evalSecretaria" class="w-full p-2 border border-gray-300 rounded-md text-sm">
+                                    <option value="PLANEACION">Secretaría de Planeación</option>
+                                    <option value="HACIENDA">Secretaría de Hacienda</option>
+                                    <option value="GOBIERNO">Secretaría de Gobierno</option>
+                                    <option value="EDUCACION">Secretaría de Educación</option>
+                                    <option value="SALUD">Secretaría de Salud</option>
+                                    <option value="INFRAESTRUCTURA">Secretaría de Infraestructura</option>
+                                    <option value="DESARROLLO_SOCIAL">Secretaría de Desarrollo Social</option>
+                                    <option value="DESARROLLO_AGROPECUARIO">Secretaría de Desarrollo Agropecuario</option>
+                                    <option value="PRODUCTIVIDAD">Secretaría de Productividad y Competitividad</option>
+                                    <option value="INDERCULTURA">Instituto de Deporte y Cultura</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Estado de Cumplimiento</label>
+                                <select id="estadoCumplimiento" class="w-full p-2 border border-gray-300 rounded-md text-sm">
+                                    <option value="Cumplió">✅ Cumplió</option>
+                                    <option value="Parcial">⚠️ Parcialmente</option>
+                                    <option value="No cumplió">❌ No cumplió</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Observaciones</label>
+                                <textarea id="obsEvaluacion" rows="3" placeholder="Detalle del cumplimiento, evidencias, observaciones..." class="w-full p-2 border border-gray-300 rounded-md text-sm"></textarea>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Proyectos Asociados</label>
+                                <select id="proyectosAsociados" multiple class="w-full p-2 border border-gray-300 rounded-md text-sm h-24">
+                                </select>
+                                <span class="text-[10px] text-gray-500">Mantén presionado Ctrl para seleccionar múltiples</span>
+                            </div>
+
+                            <button onclick="guardarEvaluacion()" class="w-full py-2.5 bg-teal-600 text-white font-bold rounded-lg hover:bg-teal-700 transition-all">
+                                Guardar Evaluación
+                            </button>
+                        </div>
+
+                        <div id="msgEvalNoPlaneacion" class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-700 hidden">
+                            ⚠️ Solo la Secretaría de Planeación puede realizar evaluaciones. 
+                            Usted puede consultar los resultados a continuación.
+                        </div>
+
+                        <div class="mt-6 pt-4 border-t border-gray-200">
+                            <h3 class="text-sm font-bold text-gray-700 mb-3">Resumen de Evaluaciones</h3>
+                            <div id="resumenEvaluaciones" class="space-y-2"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                        <div class="bg-gray-50 p-3.5 border-b border-gray-200">
+                            <h3 class="text-xs font-black uppercase text-gray-700">Registro de Evaluaciones</h3>
+                        </div>
+                        <div class="overflow-x-auto max-h-96">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-900 text-white uppercase text-[10px] tracking-wider sticky top-0">
+                                        <th class="p-2.5">Secretaría</th>
+                                        <th class="p-2.5">Estado</th>
+                                        <th class="p-2.5">Fecha</th>
+                                        <th class="p-2.5">Observaciones</th>
+                                        <th class="p-2.5">Proyectos</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaEvaluaciones" class="divide-y divide-gray-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: REPORTES -->
+            <div id="contentReportes" class="hidden">
+                <div id="reportesPlaneacionOnly" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 gradient-card p-6 rounded-xl border border-gray-200">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-bold text-blue-950 flex items-center gap-2">
+                                <span>📈</span> Reporte de Cumplimiento General
+                            </h2>
+                            <span class="badge-planeacion text-xs">🔒 Solo Planeación</span>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-3 gap-4">
+                                <div class="bg-green-50 p-4 rounded-lg border border-green-200 text-center">
+                                    <span class="block text-2xl font-black text-green-700" id="reportCumplio">0</span>
+                                    <span class="text-xs text-green-600 font-bold">✅ Cumplieron</span>
+                                </div>
+                                <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200 text-center">
+                                    <span class="block text-2xl font-black text-yellow-700" id="reportParcial">0</span>
+                                    <span class="text-xs text-yellow-600 font-bold">⚠️ Parciales</span>
+                                </div>
+                                <div class="bg-red-50 p-4 rounded-lg border border-red-200 text-center">
+                                    <span class="block text-2xl font-black text-red-700" id="reportNoCumplio">0</span>
+                                    <span class="text-xs text-red-600 font-bold">❌ No cumplieron</span>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 class="text-sm font-bold text-gray-700 mb-2">Detalle por Secretaría</h3>
+                                <div id="detalleReporte" class="space-y-2 max-h-64 overflow-y-auto"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="gradient-card p-6 rounded-xl border border-gray-200">
+                        <h2 class="text-lg font-bold text-blue-950 mb-4 flex items-center gap-2">
+                            <span>📤</span> Acciones
+                        </h2>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Número de Circular</label>
+                                <input type="text" id="reportCircularNum" readonly class="w-full p-2 border border-gray-300 rounded-md text-sm bg-gray-50 font-mono">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Fecha de Reporte</label>
+                                <input type="date" id="reportFecha" class="w-full p-2 border border-gray-300 rounded-md text-sm">
+                            </div>
+                            
+                            <button onclick="generarReportePDF()" class="w-full py-2.5 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-all flex items-center justify-center gap-2">
+                                <span>📄</span> Generar Reporte PDF
+                            </button>
+                            
+                            <button onclick="enviarReporteCorreo()" class="w-full py-2.5 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-all flex items-center justify-center gap-2">
+                                <span>✉️</span> Enviar a Secretaría de Planeación
+                            </button>
+                            
+                            <button onclick="enviarReporteControlInterno()" class="w-full py-2.5 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-700 transition-all flex items-center justify-center gap-2">
+                                <span>📋</span> Enviar a Control Interno
+                            </button>
+                        </div>
+
+                        <div id="msgReportesNoPlaneacion" class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-700 hidden">
+                            ⚠️ Solo la Secretaría de Planeación puede generar y enviar reportes oficiales.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 5: ARCHIVOS -->
+            <div id="contentArchivos" class="hidden">
+                <div class="gradient-card p-6 rounded-xl border border-gray-200">
+                    <h2 class="text-lg font-bold text-blue-950 mb-4 flex items-center gap-2">
+                        <span>📎</span> Archivos Adjuntos y Documentos
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div id="adminUploadArea">
+                            <div class="file-upload-area" onclick="document.getElementById('fileAdmin').click()">
+                                <div class="text-sm text-gray-500">
+                                    <span class="text-2xl block">📤</span>
+                                    <span>Secretaría de Planeación: Cargar documento para todas las dependencias</span>
+                                </div>
+                                <input type="file" id="fileAdmin" class="hidden" onchange="cargarArchivoAdmin(this.files[0])">
+                            </div>
+                            
+                            <div class="mt-2 flex gap-2 flex-wrap">
+                                <select id="tipoDocumento" class="p-2 border border-gray-300 rounded-md text-sm flex-1 min-w-[120px]">
+                                    <option value="Circular">Circular</option>
+                                    <option value="Instructivo">Instructivo</option>
+                                    <option value="Formato">Formato</option>
+                                    <option value="Anexo">Anexo</option>
+                                    <option value="Otro">Otro</option>
+                                </select>
+                                <input type="text" id="descDocumento" placeholder="Descripción del documento..." class="p-2 border border-gray-300 rounded-md text-sm flex-1 min-w-[200px]">
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-700 mb-2">📂 Documentos Disponibles</h3>
+                            <div id="listaArchivos" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+                        </div>
+
+                        <div class="border-t pt-4 border-gray-200">
+                            <h3 class="text-sm font-bold text-gray-700 mb-2">⬇️ Descargar Documentos</h3>
+                            <div class="flex gap-2 flex-wrap">
+                                <select id="selectDescarga" class="p-2 border border-gray-300 rounded-md text-sm flex-1 min-w-[200px]">
+                                    <option value="">Seleccione un documento...</option>
+                                </select>
+                                <button onclick="descargarDocumento()" class="px-4 py-2 bg-teal-600 text-white font-bold rounded-md hover:bg-teal-700 transition-all">
+                                    Descargar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // CONFIGURACIÓN Y VARIABLES GLOBALES
+        // ============================================================
+        
+        const API_URL = 'http://localhost:3000'; // URL del backend
+        
+        let currentUser = null;
+        let currentRole = null;
+        let currentSecretaria = null;
+        let esPlaneacion = false;
+        let isSyncing = false;
+        
+        let usuariosSistema = {
+            "PLANEACION": { pass: "Plan2026*", role: "PLANEACION", sec: "PLANEACION" },
+            "HACIENDA": { pass: "Hac2026*", role: "SECRETARIA", sec: "HACIENDA" },
+            "GOBIERNO": { pass: "Gob2026*", role: "SECRETARIA", sec: "GOBIERNO" },
+            "EDUCACION": { pass: "Edu2026*", role: "SECRETARIA", sec: "EDUCACION" },
+            "SALUD": { pass: "Sal2026*", role: "SECRETARIA", sec: "SALUD" },
+            "INFRAESTRUCTURA": { pass: "Inf2026*", role: "SECRETARIA", sec: "INFRAESTRUCTURA" },
+            "DESARROLLO_SOCIAL": { pass: "DSoc2026*", role: "SECRETARIA", sec: "DESARROLLO_SOCIAL" },
+            "DESARROLLO_AGROPECUARIO": { pass: "DAgro2026*", role: "SECRETARIA", sec: "DESARROLLO_AGROPECUARIO" },
+            "PRODUCTIVIDAD": { pass: "Prod2026*", role: "SECRETARIA", sec: "PRODUCTIVIDAD" },
+            "INDERCULTURA": { pass: "Inde2026*", role: "SECRETARIA", sec: "INDERCULTURA" }
+        };
+
+        let baseDeDatosProyectos = [];
+        let registroControlCambios = [];
+        let evaluaciones = [];
+        let archivosAdjuntos = [];
+        let circularActual = null;
+        let notificaciones = [];
+
+        // Códigos PDET (3440) - Versión resumida para ejemplo
+        const codigosPDET = [
+            1186568253771, 1186568253770, 1186568253926, 1186568253858, 1186568253843, 1186568253777,
+            1186573253779, 1186568253769, 1186568253773, 1186568253915, 1186568253916, 1186568253930
+        ];
+
+        // ============================================================
+        // FUNCIONES DE LOGIN Y SESIÓN
+        // ============================================================
+
+        function procesarLogin(e) {
+            e.preventDefault();
+            const userIn = document.getElementById('loginUser').value.trim().toUpperCase();
+            const passIn = document.getElementById('loginPass').value;
+            const errorLabel = document.getElementById('loginError');
+
+            if (usuariosSistema[userIn] && usuariosSistema[userIn].pass === passIn) {
+                currentUser = userIn;
+                currentSecretaria = usuariosSistema[userIn].sec;
+                esPlaneacion = (currentSecretaria === 'PLANEACION');
+                currentRole = esPlaneacion ? 'PLANEACION' : 'SECRETARIA';
+
+                errorLabel.classList.add('hidden');
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('mainDashboard').classList.remove('hidden');
+
+                document.getElementById('sessionRole').innerText = currentRole;
+                document.getElementById('sessionUser').innerText = currentUser;
+                document.getElementById('sessionSec').innerText = currentSecretaria;
+
+                configurarPermisos();
+                registrarLog(currentSecretaria, currentUser, "Inicio de sesión autorizado");
+                actualizarTabla();
+                actualizarEvaluaciones();
+                actualizarArchivos();
+                actualizarReporte();
+                cargarCircularInfo();
+                document.getElementById('pdetForm').reset();
+                togglePdetFields();
+                cargarDatosGuardados();
+            } else {
+                errorLabel.classList.remove('hidden');
+            }
+        }
+
+        function cerrarSesion() {
+            registrarLog(currentSecretaria, currentUser, "Cierre de sesión");
+            guardarDatos();
+            currentUser = null;
+            currentRole = null;
+            currentSecretaria = null;
+            esPlaneacion = false;
+            document.getElementById('mainDashboard').classList.add('hidden');
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('loginPass').value = '';
+        }
+
+        // ============================================================
+        // CONFIGURACIÓN DE PERMISOS
+        // ============================================================
+
+        function configurarPermisos() {
+            const esPlaneacion = (currentSecretaria === 'PLANEACION');
+            
+            // Tabs visibles
+            const tabs = ['Proyectos', 'Circular', 'Evaluacion', 'Reportes', 'Archivos'];
+            tabs.forEach(tab => {
+                const btn = document.getElementById('tab' + tab);
+                if (btn) {
+                    if (tab === 'Proyectos' || tab === 'Circular' || tab === 'Archivos') {
+                        btn.style.display = 'inline-block';
+                    } else if (esPlaneacion) {
+                        btn.style.display = 'inline-block';
+                    } else {
+                        btn.style.display = 'none';
+                    }
+                }
+            });
+
+            // Circular
+            if (esPlaneacion) {
+                document.getElementById('circularForm').classList.remove('hidden');
+                document.getElementById('msgNoPlaneacion').classList.add('hidden');
+                document.getElementById('btnPublicarCircular').style.display = 'block';
+                document.getElementById('adminCircularArea').style.display = 'block';
+                document.getElementById('permisoPlaneacionBadge').textContent = '🔓 Planeación';
+            } else {
+                document.getElementById('circularForm').classList.add('hidden');
+                document.getElementById('msgNoPlaneacion').classList.remove('hidden');
+                document.getElementById('btnPublicarCircular').style.display = 'none';
+                document.getElementById('adminCircularArea').style.display = 'none';
+                document.getElementById('permisoPlaneacionBadge').textContent = '🔒 Solo Planeación';
+            }
+
+            // Evaluación
+            if (esPlaneacion) {
+                document.getElementById('evalPlaneacionOnly').querySelector('.gradient-card:first-child').style.opacity = '1';
+                document.getElementById('evalPlaneacionOnly').querySelector('.gradient-card:first-child').style.pointerEvents = 'auto';
+                document.getElementById('msgEvalNoPlaneacion').classList.add('hidden');
+            } else {
+                document.getElementById('evalPlaneacionOnly').querySelector('.gradient-card:first-child').style.opacity = '0.5';
+                document.getElementById('evalPlaneacionOnly').querySelector('.gradient-card:first-child').style.pointerEvents = 'none';
+                document.getElementById('msgEvalNoPlaneacion').classList.remove('hidden');
+            }
+
+            // Reportes
+            if (esPlaneacion) {
+                document.getElementById('reportesPlaneacionOnly').style.opacity = '1';
+                document.getElementById('reportesPlaneacionOnly').style.pointerEvents = 'auto';
+                document.getElementById('msgReportesNoPlaneacion').classList.add('hidden');
+            } else {
+                document.getElementById('reportesPlaneacionOnly').style.opacity = '0.5';
+                document.getElementById('reportesPlaneacionOnly').style.pointerEvents = 'none';
+                document.getElementById('msgReportesNoPlaneacion').classList.remove('hidden');
+            }
+
+            // Archivos - carga
+            if (!esPlaneacion) {
+                document.getElementById('adminUploadArea').querySelector('.file-upload-area').style.opacity = '0.5';
+                document.getElementById('adminUploadArea').querySelector('.file-upload-area').style.pointerEvents = 'none';
+            } else {
+                document.getElementById('adminUploadArea').querySelector('.file-upload-area').style.opacity = '1';
+                document.getElementById('adminUploadArea').querySelector('.file-upload-area').style.pointerEvents = 'auto';
+            }
+
+            // Proyectos
+            if (!esPlaneacion) {
+                document.getElementById('secretaria').value = currentSecretaria;
+                document.getElementById('secretaria').setAttribute('disabled', 'true');
+            } else {
+                document.getElementById('secretaria').removeAttribute('disabled');
+            }
+
+            cambiarTab('proyectos');
+        }
+
+        // ============================================================
+        // NAVEGACIÓN POR TABS
+        // ============================================================
+
+        function cambiarTab(tab) {
+            document.querySelectorAll('[id^="content"]').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('[id^="tab"]').forEach(el => {
+                el.className = 'py-3 px-4 text-sm font-medium border-b-2 border-transparent hover:border-blue-500 transition-all tab-inactive';
+            });
+            
+            const contentMap = {
+                'proyectos': 'contentProyectos',
+                'circular': 'contentCircular',
+                'evaluacion': 'contentEvaluacion',
+                'reportes': 'contentReportes',
+                'archivos': 'contentArchivos'
+            };
+            const tabMap = {
+                'proyectos': 'tabProyectos',
+                'circular': 'tabCircular',
+                'evaluacion': 'tabEvaluacion',
+                'reportes': 'tabReportes',
+                'archivos': 'tabArchivos'
+            };
+            
+            if (contentMap[tab]) {
+                document.getElementById(contentMap[tab]).classList.remove('hidden');
+            }
+            if (tabMap[tab]) {
+                const btn = document.getElementById(tabMap[tab]);
+                if (btn) {
+                    btn.className = 'py-3 px-4 text-sm font-medium border-b-2 border-transparent hover:border-blue-500 transition-all tab-active';
+                }
+            }
+            
+            if (tab === 'reportes') actualizarReporte();
+            if (tab === 'evaluacion') actualizarEvaluaciones();
+            if (tab === 'circular') cargarCircularInfo();
+            if (tab === 'archivos') actualizarArchivos();
+        }
+
+        // ============================================================
+        // FUNCIONES DE CIRCULAR
+        // ============================================================
+
+        function guardarCircular() {
+            if (currentSecretaria !== 'PLANEACION') {
+                mostrarMensaje('⚠️ Solo Planeación puede publicar circulares', 'error');
+                return;
+            }
+
+            const numCircular = document.getElementById('numCircular').value.trim();
+            const fechaCircular = document.getElementById('fechaCircular').value;
+            const asunto = document.getElementById('asuntoCircular').value.trim();
+            const descripcion = document.getElementById('descCircular').value.trim();
+            const fechaLimite = document.getElementById('fechaLimite').value;
+
+            if (!numCircular || !fechaCircular || !asunto || !descripcion || !fechaLimite) {
+                mostrarMensaje('⚠️ Complete todos los campos', 'error');
+                return;
+            }
+
+            circularActual = {
+                numero: numCircular,
+                fecha: fechaCircular,
+                asunto: asunto,
+                descripcion: descripcion,
+                fechaLimite: fechaLimite,
+                publicada: new Date().toLocaleString('es-CO'),
+                publicadaPor: currentUser
+            };
+
+            actualizarVistaCircular();
+            document.getElementById('reportCircularNum').value = numCircular;
+            document.getElementById('reportFecha').value = new Date().toISOString().split('T')[0];
+
+            registrarLog(currentSecretaria, currentUser, `CIRCULAR: Publicada ${numCircular}`);
+            mostrarMensaje('✅ Circular publicada exitosamente', 'success');
+            agregarNotificacion('Circular', `Publicada ${numCircular} - ${asunto}`, 'info');
+            guardarDatos();
+        }
+
+        function actualizarVistaCircular() {
+            if (circularActual) {
+                document.getElementById('viewNumCircular').textContent = circularActual.numero;
+                document.getElementById('viewFechaCircular').textContent = circularActual.fecha;
+                document.getElementById('viewAsuntoCircular').textContent = circularActual.asunto;
+                document.getElementById('viewDescCircular').textContent = circularActual.descripcion;
+                document.getElementById('viewFechaLimite').textContent = circularActual.fechaLimite;
+                document.getElementById('viewPublicadaPor').textContent = circularActual.publicadaPor;
+                document.getElementById('viewPublicadaFecha').textContent = circularActual.publicada;
+                
+                const archivoCirc = archivosAdjuntos.find(a => a.esCircular === true);
+                if (archivoCirc) {
+                    document.getElementById('viewArchivoCircular').innerHTML = `
+                        <button onclick="descargarArchivo('${archivoCirc.id}')" class="text-blue-600 hover:text-blue-800 font-bold text-sm flex items-center gap-1">
+                            <span>📎</span> ${archivoCirc.nombre}
+                        </button>
+                    `;
+                } else {
+                    document.getElementById('viewArchivoCircular').innerHTML = '<span class="text-gray-400 text-sm">No hay archivo adjunto</span>';
+                }
+
+                const fechaLimite = new Date(circularActual.fechaLimite);
+                const ahora = new Date();
+                if (ahora > fechaLimite) {
+                    document.getElementById('viewEstadoCircular').className = 'badge-no-cumplio';
+                    document.getElementById('viewEstadoCircular').textContent = '⏰ Vencida';
+                } else {
+                    document.getElementById('viewEstadoCircular').className = 'badge-cumplio';
+                    document.getElementById('viewEstadoCircular').textContent = '✅ Vigente';
+                }
+            }
+        }
+
+        function cargarCircularInfo() {
+            if (circularActual) {
+                document.getElementById('numCircular').value = circularActual.numero;
+                document.getElementById('fechaCircular').value = circularActual.fecha;
+                document.getElementById('asuntoCircular').value = circularActual.asunto;
+                document.getElementById('descCircular').value = circularActual.descripcion;
+                document.getElementById('fechaLimite').value = circularActual.fechaLimite;
+                document.getElementById('reportCircularNum').value = circularActual.numero;
+                actualizarVistaCircular();
+            }
+        }
+
+        function cargarCircular(file) {
+            if (!file || currentSecretaria !== 'PLANEACION') return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const index = archivosAdjuntos.findIndex(a => a.esCircular === true);
+                if (index !== -1) archivosAdjuntos.splice(index, 1);
+                
+                archivosAdjuntos.push({
+                    id: Date.now(),
+                    nombre: file.name,
+                    tipo: 'Circular',
+                    descripcion: 'Circular oficial',
+                    contenido: e.target.result,
+                    fecha: new Date().toLocaleString('es-CO'),
+                    subidoPor: currentUser,
+                    size: file.size,
+                    esCircular: true
+                });
+                
+                document.getElementById('circularCargada').classList.remove('hidden');
+                document.getElementById('nombreCircular').textContent = file.name;
+                actualizarArchivos();
+                actualizarVistaCircular();
+                guardarDatos();
+                registrarLog(currentSecretaria, currentUser, `CIRCULAR ADJUNTA: ${file.name}`);
+                mostrarMensaje(`✅ Circular "${file.name}" cargada`, 'success');
+                actualizarSelectDescarga();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function eliminarCircular() {
+            if (currentSecretaria !== 'PLANEACION') {
+                mostrarMensaje('⚠️ Solo Planeación puede eliminar la circular', 'error');
+                return;
+            }
+            const index = archivosAdjuntos.findIndex(a => a.esCircular === true);
+            if (index !== -1) {
+                archivosAdjuntos.splice(index, 1);
+                document.getElementById('circularCargada').classList.add('hidden');
+                actualizarArchivos();
+                actualizarVistaCircular();
+                guardarDatos();
+                mostrarMensaje('🗑️ Circular eliminada', 'info');
+            }
+        }
+
+        // ============================================================
+        // FUNCIONES DE EVALUACIÓN
+        // ============================================================
+
+        function guardarEvaluacion() {
+            if (currentSecretaria !== 'PLANEACION') {
+                mostrarMensaje('⚠️ Solo Planeación puede evaluar', 'error');
+                return;
+            }
+
+            const secretaria = document.getElementById('evalSecretaria').value;
+            const estado = document.getElementById('estadoCumplimiento').value;
+            const observaciones = document.getElementById('obsEvaluacion').value.trim();
+            const proyectosSelect = document.getElementById('proyectosAsociados');
+            const proyectos = Array.from(proyectosSelect.selectedOptions).map(opt => opt.value);
+
+            if (!observaciones) {
+                mostrarMensaje('⚠️ Ingrese observaciones', 'error');
+                return;
+            }
+
+            const index = evaluaciones.findIndex(e => e.secretaria === secretaria);
+            const evaluacion = {
+                secretaria, estado, observaciones, proyectos,
+                fecha: new Date().toLocaleString('es-CO'),
+                evaluadoPor: currentUser
+            };
+
+            if (index !== -1) {
+                evaluaciones[index] = evaluacion;
+            } else {
+                evaluaciones.push(evaluacion);
+            }
+
+            registrarLog(currentSecretaria, currentUser, `EVALUACIÓN: ${estado} para ${secretaria}`);
+            actualizarEvaluaciones();
+            actualizarReporte();
+            guardarDatos();
+            mostrarMensaje('✅ Evaluación guardada', 'success');
+            document.getElementById('obsEvaluacion').value = '';
+            document.getElementById('proyectosAsociados').selectedIndex = -1;
+            verificarPlazo();
+        }
+
+        function actualizarEvaluaciones() {
+            const tbody = document.getElementById('tablaEvaluaciones');
+            const resumen = document.getElementById('resumenEvaluaciones');
+            
+            tbody.innerHTML = '';
+            evaluaciones.forEach(e => {
+                const badgeClass = e.estado === 'Cumplió' ? 'badge-cumplio' : 
+                                  e.estado === 'Parcial' ? 'badge-parcial' : 'badge-no-cumplio';
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-2.5 font-bold">${e.secretaria}</td>
+                        <td class="p-2.5"><span class="${badgeClass}">${e.estado}</span></td>
+                        <td class="p-2.5 text-gray-600">${e.fecha}</td>
+                        <td class="p-2.5 text-gray-700 max-w-xs truncate">${e.observaciones}</td>
+                        <td class="p-2.5 text-gray-600">${e.proyectos.length}</td>
+                    </tr>
+                `;
+            });
+
+            if (evaluaciones.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400 italic">No hay evaluaciones</td></tr>`;
+            }
+
+            resumen.innerHTML = '';
+            const estados = { 'Cumplió': 0, 'Parcial': 0, 'No cumplió': 0 };
+            evaluaciones.forEach(e => { estados[e.estado]++; });
+            
+            const total = evaluaciones.length || 1;
+            Object.entries(estados).forEach(([estado, count]) => {
+                const color = estado === 'Cumplió' ? 'green' : estado === 'Parcial' ? 'yellow' : 'red';
+                const porcentaje = Math.round((count / total) * 100);
+                resumen.innerHTML += `
+                    <div class="flex justify-between items-center p-2 bg-${color}-50 rounded-lg border border-${color}-200">
+                        <span class="font-bold text-${color}-700">${estado}</span>
+                        <span class="text-${color}-700 font-black">${count} (${porcentaje}%)</span>
+                    </div>
+                `;
+            });
+
+            const proyectosSelect = document.getElementById('proyectosAsociados');
+            proyectosSelect.innerHTML = '';
+            baseDeDatosProyectos.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p.bpin;
+                option.textContent = `${p.bpin} - ${p.nombreProyecto.substring(0, 30)}...`;
+                proyectosSelect.appendChild(option);
+            });
+        }
+
+        // ============================================================
+        // FUNCIONES DE REPORTE
+        // ============================================================
+
+        function actualizarReporte() {
+            const estados = { 'Cumplió': 0, 'Parcial': 0, 'No cumplió': 0 };
+            const detalle = {};
+            
+            evaluaciones.forEach(e => {
+                estados[e.estado] = (estados[e.estado] || 0) + 1;
+                if (!detalle[e.secretaria]) detalle[e.secretaria] = { estado: e.estado, observaciones: e.observaciones };
+            });
+
+            document.getElementById('reportCumplio').textContent = estados['Cumplió'] || 0;
+            document.getElementById('reportParcial').textContent = estados['Parcial'] || 0;
+            document.getElementById('reportNoCumplio').textContent = estados['No cumplió'] || 0;
+
+            const detalleDiv = document.getElementById('detalleReporte');
+            detalleDiv.innerHTML = '';
+            
+            if (Object.keys(detalle).length === 0) {
+                detalleDiv.innerHTML = '<div class="text-center text-gray-400 italic p-4">No hay evaluaciones</div>';
+                return;
+            }
+            
+            Object.entries(detalle).forEach(([sec, data]) => {
+                const badgeClass = data.estado === 'Cumplió' ? 'badge-cumplio' : 
+                                  data.estado === 'Parcial' ? 'badge-parcial' : 'badge-no-cumplio';
+                detalleDiv.innerHTML += `
+                    <div class="flex justify-between items-center p-2 bg-gray-50 rounded-lg border border-gray-200">
+                        <span class="font-bold text-gray-700">${sec}</span>
+                        <span class="${badgeClass}">${data.estado}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function verificarPlazo() {
+            if (!circularActual) return;
+            const fechaLimite = new Date(circularActual.fechaLimite);
+            const ahora = new Date();
+            if (ahora > fechaLimite) {
+                const pendientes = evaluaciones.filter(e => e.estado !== 'Cumplió');
+                if (pendientes.length > 0) {
+                    agregarNotificacion('Plazo vencido', 
+                        `${pendientes.length} secretarías no cumplieron completamente.`, 'warning');
+                }
+            }
+        }
+
+        function generarReportePDF() {
+            if (currentSecretaria !== 'PLANEACION') {
+                mostrarMensaje('⚠️ Solo Planeación puede generar reportes oficiales', 'error');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            
+            doc.setFontSize(16);
+            doc.setTextColor(30, 58, 138);
+            doc.text('Gobernación del Putumayo', 105, 20, { align: 'center' });
+            
+            doc.setFontSize(14);
+            doc.setTextColor(0);
+            doc.text('Reporte de Evaluación PDET - Seguimiento y Cumplimiento', 105, 30, { align: 'center' });
+            
+            const numCircular = document.getElementById('reportCircularNum').value || 'No definida';
+            doc.setFontSize(10);
+            doc.text(`Circular: ${numCircular}`, 20, 45);
+            doc.text(`Fecha: ${new Date().toLocaleDateString('es-CO')}`, 20, 50);
+            doc.text(`Generado por: ${currentUser}`, 20, 55);
+            
+            doc.setFontSize(12);
+            doc.text('RESUMEN DE CUMPLIMIENTO', 20, 70);
+            
+            const cumplio = document.getElementById('reportCumplio').textContent;
+            const parcial = document.getElementById('reportParcial').textContent;
+            const noCumplio = document.getElementById('reportNoCumplio').textContent;
+            const total = parseInt(cumplio) + parseInt(parcial) + parseInt(noCumplio) || 1;
+            
+            doc.setFontSize(10);
+            doc.text(`✅ Cumplieron: ${cumplio} (${Math.round((cumplio/total)*100)}%)`, 20, 80);
+            doc.text(`⚠️ Parcialmente: ${parcial} (${Math.round((parcial/total)*100)}%)`, 20, 85);
+            doc.text(`❌ No cumplieron: ${noCumplio} (${Math.round((noCumplio/total)*100)}%)`, 20, 90);
+            
+            doc.text('DETALLE POR SECRETARÍA', 20, 105);
+            let y = 115;
+            const detalle = document.getElementById('detalleReporte').children;
+            for (let i = 0; i < Math.min(detalle.length, 15); i++) {
+                const texto = detalle[i].textContent.trim();
+                doc.setFontSize(9);
+                doc.text(`• ${texto}`, 20, y);
+                y += 6;
+                if (y > 270) { doc.addPage(); y = 20; }
+            }
+            
+            doc.setFontSize(8);
+            doc.setTextColor(128);
+            doc.text(`Reporte generado por: ${currentUser} - ${new Date().toLocaleString('es-CO')}`, 20, 280);
+            doc.text('Sistema Integral de Seguimiento PDET - Gobernación del Putumayo', 105, 285, { align: 'center' });
+            
+            doc.save(`Reporte_PDET_${numCircular}_${new Date().toISOString().split('T')[0]}.pdf`);
+            registrarLog(currentSecretaria, currentUser, `REPORTE PDF: Generado ${numCircular}`);
+            mostrarMensaje('✅ Reporte PDF generado', 'success');
+        }
+
+        function enviarReporteCorreo() {
+            if (currentSecretaria !== 'PLANEACION') {
+                mostrarMensaje('⚠️ Solo Planeación puede enviar reportes', 'error');
+                return;
+            }
+            const numCircular = document.getElementById('reportCircularNum').value || 'No definida';
+            registrarLog(currentSecretaria, currentUser, `CORREO ENVIADO: Reporte a Planeación - ${numCircular}`);
+            agregarNotificacion('Correo enviado', `Reporte a Planeación - ${numCircular}`, 'success');
+            mostrarMensaje('✅ Reporte enviado a Planeación', 'success');
+        }
+
+        function enviarReporteControlInterno() {
+            if (currentSecretaria !== 'PLANEACION') {
+                mostrarMensaje('⚠️ Solo Planeación puede enviar reportes', 'error');
+                return;
+            }
+            const numCircular = document.getElementById('reportCircularNum').value || 'No definida';
+            registrarLog(currentSecretaria, currentUser, `CORREO ENVIADO: Reporte a Control Interno - ${numCircular}`);
+            agregarNotificacion('Correo enviado', `Reporte a Control Interno - ${numCircular}`, 'success');
+            mostrarMensaje('✅ Reporte enviado a Control Interno', 'success');
+        }
+
+        // ============================================================
+        // SINCORNIZACIÓN CON GOOGLE SHEETS
+        // ============================================================
+
+        async function sincronizarConGoogleSheets() {
+            if (currentSecretaria !== 'PLANEACION') {
+                mostrarMensaje('⚠️ Solo Planeación puede sincronizar con Google Sheets', 'error');
+                return;
+            }
+
+            if (baseDeDatosProyectos.length === 0 && evaluaciones.length === 0) {
+                mostrarMensaje('⚠️ No hay datos para sincronizar', 'error');
+                return;
+            }
+
+            if (isSyncing) return;
+            isSyncing = true;
+            const btn = document.getElementById('btnSyncSheets');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="sync-spinner"></span> Sincronizando...';
+
+            try {
+                const response = await fetch(`${API_URL}/api/sheets/update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        proyectos: baseDeDatosProyectos,
+                        evaluaciones: evaluaciones,
+                        circular: circularActual
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    mostrarMensaje('✅ Datos sincronizados con Google Sheets', 'success');
+                    registrarLog(currentSecretaria, currentUser, '🔄 Sincronización con Google Sheets exitosa');
+                    agregarNotificacion('Sincronización', 'Datos actualizados en Google Sheets', 'success');
+                    
+                    // Actualizar el botón con éxito
+                    btn.innerHTML = '✅ Sincronizado';
+                    setTimeout(() => {
+                        btn.innerHTML = '<span>🔄</span> Sincronizar con Google Sheets';
+                        btn.disabled = false;
+                        isSyncing = false;
+                    }, 3000);
+                } else {
+                    mostrarMensaje(`❌ Error: ${result.error || 'No se pudo sincronizar'}`, 'error');
+                    btn.innerHTML = '❌ Error';
+                    setTimeout(() => {
+                        btn.innerHTML = '<span>🔄</span> Sincronizar con Google Sheets';
+                        btn.disabled = false;
+                        isSyncing = false;
+                    }, 3000);
+                }
+            } catch (error) {
+                console.error('Error en sincronización:', error);
+                mostrarMensaje('❌ Error de conexión con el servidor. Verifica que el backend esté corriendo.', 'error');
+                btn.innerHTML = '❌ Error';
+                setTimeout(() => {
+                    btn.innerHTML = '<span>🔄</span> Sincronizar con Google Sheets';
+                    btn.disabled = false;
+                    isSyncing = false;
+                }, 3000);
+            }
+        }
+
+        // ============================================================
+        // FUNCIONES DE ARCHIVOS
+        // ============================================================
+
+        function cargarArchivoAdmin(file) {
+            if (!file || currentSecretaria !== 'PLANEACION') return;
+            
+            const tipo = document.getElementById('tipoDocumento').value;
+            const desc = document.getElementById('descDocumento').value.trim() || 'Sin descripción';
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                archivosAdjuntos.push({
+                    id: Date.now(),
+                    nombre: file.name,
+                    tipo: tipo,
+                    descripcion: desc,
+                    contenido: e.target.result,
+                    fecha: new Date().toLocaleString('es-CO'),
+                    subidoPor: currentUser,
+                    size: file.size
+                });
+                actualizarArchivos();
+                guardarDatos();
+                registrarLog(currentSecretaria, currentUser, `ARCHIVO SUBIDO: ${file.name}`);
+                mostrarMensaje(`✅ Archivo "${file.name}" cargado`, 'success');
+                actualizarSelectDescarga();
+                document.getElementById('descDocumento').value = '';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function actualizarArchivos() {
+            const lista = document.getElementById('listaArchivos');
+            lista.innerHTML = '';
+            
+            const archivosMostrar = archivosAdjuntos.filter(a => !a.esCircular);
+            
+            if (archivosMostrar.length === 0) {
+                lista.innerHTML = `
+                    <div class="col-span-2 text-center text-gray-400 italic p-8">
+                        No hay archivos disponibles.
+                    </div>
+                `;
+                return;
+            }
+            
+            archivosMostrar.forEach(archivo => {
+                const icono = archivo.tipo === 'Circular' ? '📄' : 
+                             archivo.tipo === 'Instructivo' ? '📋' : 
+                             archivo.tipo === 'Formato' ? '📊' : 
+                             archivo.tipo === 'Anexo' ? '📎' : '📁';
+                
+                lista.innerHTML += `
+                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-200 hover:shadow-md transition-all">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-lg">${icono}</span>
+                                <span class="font-bold text-gray-700 text-sm ml-1">${archivo.nombre}</span>
+                            </div>
+                            <span class="text-xs text-gray-500">${archivo.fecha}</span>
+                        </div>
+                        <div class="mt-1 text-xs text-gray-600">
+                            <span class="bg-blue-100 px-2 py-0.5 rounded">${archivo.tipo}</span>
+                            <span class="ml-2">${archivo.descripcion}</span>
+                        </div>
+                        <div class="mt-1 text-[10px] text-gray-400">
+                            Subido por: ${archivo.subidoPor} | ${(archivo.size / 1024).toFixed(1)} KB
+                        </div>
+                        <button onclick="descargarArchivo('${archivo.id}')" class="mt-2 text-xs bg-teal-600 text-white px-2 py-0.5 rounded hover:bg-teal-700 transition-all">
+                            ⬇️ Descargar
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        function actualizarSelectDescarga() {
+            const select = document.getElementById('selectDescarga');
+            select.innerHTML = '<option value="">Seleccione un documento...</option>';
+            archivosAdjuntos.forEach(archivo => {
+                const option = document.createElement('option');
+                option.value = archivo.id;
+                option.textContent = `${archivo.tipo}: ${archivo.nombre}`;
+                select.appendChild(option);
+            });
+        }
+
+        function descargarDocumento() {
+            const select = document.getElementById('selectDescarga');
+            const id = select.value;
+            if (!id) {
+                mostrarMensaje('⚠️ Seleccione un documento', 'error');
+                return;
+            }
+            descargarArchivo(id);
+        }
+
+        function descargarArchivo(id) {
+            const archivo = archivosAdjuntos.find(a => a.id == id);
+            if (!archivo) {
+                mostrarMensaje('❌ Archivo no encontrado', 'error');
+                return;
+            }
+            const link = document.createElement('a');
+            link.href = archivo.contenido;
+            link.download = archivo.nombre;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            registrarLog(currentSecretaria, currentUser, `DESCARGA: ${archivo.nombre}`);
+            mostrarMensaje(`✅ Descargando "${archivo.nombre}"`, 'success');
+        }
+
+        // ============================================================
+        // FUNCIONES DE NOTIFICACIONES
+        // ============================================================
+
+        function agregarNotificacion(titulo, mensaje, tipo = 'info') {
+            notificaciones.unshift({
+                id: Date.now(),
+                titulo, mensaje, tipo,
+                fecha: new Date().toLocaleString('es-CO'),
+                leido: false
+            });
+            actualizarNotificaciones();
+        }
+
+        function actualizarNotificaciones() {
+            const count = notificaciones.filter(n => !n.leido).length;
+            const badge = document.getElementById('notifCount');
+            if (count > 0) {
+                badge.textContent = count;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+            
+            const lista = document.getElementById('notifList');
+            lista.innerHTML = '';
+            if (notificaciones.length === 0) {
+                lista.innerHTML = '<div class="text-center text-gray-400 p-4">No hay notificaciones</div>';
+                return;
+            }
+            
+            notificaciones.forEach(notif => {
+                const color = notif.tipo === 'success' ? 'text-green-700' : 
+                             notif.tipo === 'warning' ? 'text-yellow-700' : 
+                             notif.tipo === 'error' ? 'text-red-700' : 'text-blue-700';
+                lista.innerHTML += `
+                    <div class="p-2 border-b border-gray-100 text-xs ${notif.leido ? 'opacity-50' : ''}">
+                        <div class="font-bold ${color}">${notif.titulo}</div>
+                        <div class="text-gray-600">${notif.mensaje}</div>
+                        <div class="text-[10px] text-gray-400 mt-1">${notif.fecha}</div>
+                    </div>
+                `;
+            });
+        }
+
+        function toggleNotificaciones() {
+            const panel = document.getElementById('notifPanel');
+            panel.classList.toggle('hidden');
+            if (!panel.classList.contains('hidden')) {
+                notificaciones.forEach(n => n.leido = true);
+                actualizarNotificaciones();
+            }
+        }
+
+        // ============================================================
+        // FUNCIONES DE PROYECTOS
+        // ============================================================
+
+        function togglePdetFields() {
+            const punto = document.getElementById('puntoAcuerdo').value;
+            const pdetFields = document.getElementById('pdetFields');
+            const inputs = pdetFields.querySelectorAll('input, select');
+            
+            if (punto === 'Punto 1') {
+                pdetFields.style.opacity = '1';
+                pdetFields.style.pointerEvents = 'auto';
+                inputs.forEach(el => el.removeAttribute('disabled'));
+            } else {
+                pdetFields.style.opacity = '0.4';
+                pdetFields.style.pointerEvents = 'none';
+                inputs.forEach(el => el.setAttribute('disabled', 'true'));
+            }
+        }
+
+        function buscarCodigoPDET(valor) {
+            const input = document.getElementById('codigoIniciativa');
+            const lista = document.getElementById('autocomplete-list');
+            
+            if (!valor || valor.length < 2) {
+                lista.innerHTML = '';
+                return;
+            }
+
+            const resultados = codigosPDET.filter(codigo => 
+                codigo.toString().includes(valor)
+            );
+
+            const resultadosLimitados = resultados.slice(0, 20);
+            lista.innerHTML = '';
+
+            if (resultadosLimitados.length === 0) {
+                const div = document.createElement('div');
+                div.textContent = '❌ No hay coincidencias en la base de 3,440 códigos';
+                div.style.color = '#6b7280';
+                div.style.fontSize = '11px';
+                div.style.padding = '8px 10px';
+                div.style.cursor = 'default';
+                lista.appendChild(div);
+                return;
+            }
+
+            resultadosLimitados.forEach(codigo => {
+                const div = document.createElement('div');
+                div.textContent = codigo;
+                div.addEventListener('click', function() {
+                    input.value = this.textContent;
+                    lista.innerHTML = '';
+                });
+                const regex = new RegExp(`(${valor})`, 'gi');
+                div.innerHTML = div.textContent.replace(regex, '<strong style="color:#1e3a8a;">$1</strong>');
+                lista.appendChild(div);
+            });
+        }
+
+        function guardarProyecto(e) {
+            e.preventDefault();
+            
+            const bpin = document.getElementById('bpin').value.trim();
+            const nombreProyecto = document.getElementById('nombreProyecto').value.trim();
+            const secResponsable = (currentSecretaria === 'PLANEACION') ? document.getElementById('secretaria').value : currentSecretaria;
+            const puntoAcuerdo = document.getElementById('puntoAcuerdo').value;
+            const editIndex = document.getElementById('editIndex').value;
+            
+            if (!bpin || !nombreProyecto) {
+                mostrarMensaje('⚠️ Complete BPIN y Nombre', 'error');
+                return;
+            }
+            
+            let pilarPdet = "N/A";
+            let codigoIniciativa = "N/A";
+
+            if (puntoAcuerdo === 'Punto 1') {
+                pilarPdet = document.getElementById('pilarPdet').value;
+                codigoIniciativa = document.getElementById('codigoIniciativa').value || "No especificado";
+            }
+
+            const presupuesto = document.getElementById('presupuesto').value || "0";
+            const fuentes = document.getElementById('fuentes').value;
+            const ejecutado = document.getElementById('ejecutado').value;
+            let porcentajeEjecucion = document.getElementById('porcentajeEjecucion').value || "0";
+            
+            const numPorcentaje = parseInt(porcentajeEjecucion);
+            if (isNaN(numPorcentaje) || numPorcentaje < 0 || numPorcentaje > 100) {
+                mostrarMensaje('⚠️ El porcentaje debe estar entre 0 y 100', 'error');
+                return;
+            }
+
+            const datosProyecto = {
+                bpin, nombreProyecto, secretaria: secResponsable,
+                puntoAcuerdo, pilarPdet, codigoIniciativa,
+                presupuesto: parseInt(presupuesto) || 0,
+                fuentes, ejecutado, porcentajeEjecucion: numPorcentaje,
+                ultimoEditor: currentUser,
+                ultimaSecretariaEditora: currentSecretaria,
+                fechaModificacion: new Date().toLocaleString('es-CO')
+            };
+
+            if (editIndex === "" && baseDeDatosProyectos.some(p => p.bpin === bpin)) {
+                mostrarMensaje('⚠️ El BPIN ya está registrado', 'error');
+                return;
+            }
+
+            if (editIndex === "") {
+                baseDeDatosProyectos.push(datosProyecto);
+                registrarLog(currentSecretaria, currentUser, `CREACIÓN: Proyecto ${bpin}`);
+                agregarNotificacion('Proyecto creado', `${bpin} por ${currentUser}`, 'success');
+            } else {
+                const antiguoBpin = baseDeDatosProyectos[editIndex].bpin;
+                baseDeDatosProyectos[editIndex] = datosProyecto;
+                registrarLog(currentSecretaria, currentUser, `MODIFICACIÓN: ${antiguoBpin}`);
+                cancelarEdicion();
+            }
+
+            actualizarTabla();
+            document.getElementById('pdetForm').reset();
+            if (currentSecretaria !== 'PLANEACION') document.getElementById('secretaria').value = currentSecretaria;
+            togglePdetFields();
+            guardarDatos();
+            mostrarMensaje('✅ Proyecto registrado', 'success');
+        }
+
+        function prepararEdicion(index) {
+            const proj = baseDeDatosProyectos[index];
+            if (currentSecretaria !== 'PLANEACION' && proj.secretaria !== currentSecretaria) {
+                alert(`❌ Solo puede modificar proyectos de ${currentSecretaria}`);
+                return;
+            }
+
+            document.getElementById('editIndex').value = index;
+            document.getElementById('bpin').value = proj.bpin;
+            document.getElementById('nombreProyecto').value = proj.nombreProyecto;
+            document.getElementById('secretaria').value = proj.secretaria;
+            document.getElementById('puntoAcuerdo').value = proj.puntoAcuerdo;
+            document.getElementById('presupuesto').value = proj.presupuesto;
+            document.getElementById('fuentes').value = proj.fuentes;
+            document.getElementById('ejecutado').value = proj.ejecutado;
+            document.getElementById('porcentajeEjecucion').value = proj.porcentajeEjecucion;
+            
+            togglePdetFields();
+            if (proj.puntoAcuerdo === 'Punto 1') {
+                document.getElementById('pilarPdet').value = proj.pilarPdet;
+                document.getElementById('codigoIniciativa').value = proj.codigoIniciativa;
+            }
+
+            document.getElementById('formTitle').innerText = "✏️ Modificar Proyecto";
+            document.getElementById('btnCancelarEdicion').classList.remove('hidden');
+        }
+
+        function cancelarEdicion() {
+            document.getElementById('editIndex').value = "";
+            document.getElementById('formTitle').innerText = "📝 Registrar Proyecto";
+            document.getElementById('btnCancelarEdicion').classList.add('hidden');
+            document.getElementById('pdetForm').reset();
+            if (currentSecretaria !== 'PLANEACION') document.getElementById('secretaria').value = currentSecretaria;
+            togglePdetFields();
+        }
+
+        function eliminarProyecto(index) {
+            const proj = baseDeDatosProyectos[index];
+            if (currentSecretaria !== 'PLANEACION' && proj.secretaria !== currentSecretaria) {
+                alert(`❌ No tiene permisos para eliminar proyectos de ${proj.secretaria}`);
+                return;
+            }
+            if (confirm(`¿Eliminar proyecto ${proj.bpin}?`)) {
+                registrarLog(currentSecretaria, currentUser, `ELIMINACIÓN: ${proj.bpin}`);
+                baseDeDatosProyectos.splice(index, 1);
+                actualizarTabla();
+                cancelarEdicion();
+                guardarDatos();
+                mostrarMensaje('🗑️ Proyecto eliminado', 'info');
+            }
+        }
+
+        // ============================================================
+        // FUNCIONES DE UTILIDAD
+        // ============================================================
+
+        function registrarLog(sec, usuario, accion) {
+            const timestamp = new Date().toLocaleString('es-CO');
+            const mensajeLog = `[${timestamp}] [${sec}] [${usuario}] -> ${accion}`;
+            registroControlCambios.unshift(mensajeLog);
+            
+            const box = document.getElementById('logCambios');
+            if (box) {
+                box.innerHTML = registroControlCambios.map(l => 
+                    `<div class="border-b border-gray-800 pb-1 text-slate-300"><span class="text-yellow-600 font-bold">&gt;</span> ${l}</div>`
+                ).join('');
+            }
+        }
+
+        function actualizarTabla() {
+            const tbody = document.getElementById('tablaCuerpo');
+            const vacio = document.getElementById('mensajeVacio');
+            tbody.innerHTML = '';
+
+            if (baseDeDatosProyectos.length === 0) {
+                vacio.style.display = 'block';
+            } else {
+                vacio.style.display = 'none';
+            }
+
+            let secretariasActivas = new Set();
+            let totalIniciativas = 0;
+
+            baseDeDatosProyectos.forEach((item, index) => {
+                secretariasActivas.add(item.secretaria);
+                if (item.codigoIniciativa !== 'N/A' && item.codigoIniciativa !== 'No especificado') totalIniciativas++;
+
+                const presupuestoFormateado = new Intl.NumberFormat('es-CO', {
+                    style: 'currency', currency: 'COP', minimumFractionDigits: 0
+                }).format(item.presupuesto || 0);
+
+                const badgeEjecucion = item.ejecutado === 'Sí' 
+                    ? '<span class="badge-cumplio">✅ Ejecutado</span>' 
+                    : '<span class="badge-no-cumplio">⏳ No Ejecutado</span>';
+
+                const progressWidth = Math.min(item.porcentajeEjecucion || 0, 100);
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 transition-colors text-xs">
+                        <td class="p-2.5 font-mono font-bold text-blue-900">${item.bpin}</td>
+                        <td class="p-2.5 font-semibold text-gray-700">${item.secretaria}</td>
+                        <td class="p-2.5 font-mono text-xs">${presupuestoFormateado}</td>
+                        <td class="p-2.5">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-gray-700">${item.porcentajeEjecucion || 0}%</span>
+                                <div class="progress-bar flex-1">
+                                    <div class="progress-fill" style="width: ${progressWidth}%"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="p-2.5">${badgeEjecucion}</td>
+                        <td class="p-2.5 text-center flex items-center justify-center gap-3">
+                            <button onclick="prepararEdicion(${index})" class="text-blue-600 hover:text-blue-900 font-bold">✏️</button>
+                            <button onclick="eliminarProyecto(${index})" class="text-red-500 hover:text-red-700 font-bold">✕</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('totalProyectos').innerText = baseDeDatosProyectos.length;
+            document.getElementById('totalIniciativasPdet').innerText = totalIniciativas;
+            document.getElementById('totalSecretarias').innerText = secretariasActivas.size;
+        }
+
+        function exportarExcel() {
+            try {
+                const wb = XLSX.utils.book_new();
+                
+                const hojaProyectos = baseDeDatosProyectos.map(item => ({
+                    "BPIN": item.bpin,
+                    "Proyecto": item.nombreProyecto,
+                    "Secretaría": item.secretaria,
+                    "Presupuesto": item.presupuesto || 0,
+                    "Fuentes": item.fuentes,
+                    "Ejecutado": item.ejecutado,
+                    "% Ejecución": item.porcentajeEjecucion || 0,
+                    "Punto Acuerdo": item.puntoAcuerdo,
+                    "Pilar PDET": item.pilarPdet,
+                    "Código Iniciativa": item.codigoIniciativa
+                }));
+
+                const ws1 = XLSX.utils.json_to_sheet(hojaProyectos);
+                ws1['!cols'] = [{wch:18}, {wch:40}, {wch:22}, {wch:15}, {wch:30}, {wch:12}, {wch:12}, {wch:25}, {wch:30}, {wch:20}];
+                XLSX.utils.book_append_sheet(wb, ws1, "PROYECTOS");
+
+                if (evaluaciones.length > 0) {
+                    const hojaEval = evaluaciones.map(item => ({
+                        "Secretaría": item.secretaria,
+                        "Estado": item.estado,
+                        "Observaciones": item.observaciones,
+                        "Fecha": item.fecha,
+                        "Evaluado Por": item.evaluadoPor
+                    }));
+                    const ws2 = XLSX.utils.json_to_sheet(hojaEval);
+                    ws2['!cols'] = [{wch:22}, {wch:15}, {wch:50}, {wch:20}, {wch:18}];
+                    XLSX.utils.book_append_sheet(wb, ws2, "EVALUACIONES");
+                }
+
+                if (circularActual) {
+                    const hojaCirc = [{
+                        "Circular": circularActual.numero,
+                        "Fecha": circularActual.fecha,
+                        "Asunto": circularActual.asunto,
+                        "Fecha Límite": circularActual.fechaLimite,
+                        "Publicada": circularActual.publicada
+                    }];
+                    const ws3 = XLSX.utils.json_to_sheet(hojaCirc);
+                    ws3['!cols'] = [{wch:20}, {wch:15}, {wch:40}, {wch:25}, {wch:25}];
+                    XLSX.utils.book_append_sheet(wb, ws3, "CIRCULAR");
+                }
+
+                XLSX.writeFile(wb, `Reporte_PDET_${new Date().toISOString().split('T')[0]}.xlsx`);
+                registrarLog(currentSecretaria, currentUser, "EXPORTACIÓN: Excel generado");
+                mostrarMensaje('✅ Excel exportado', 'success');
+            } catch (error) {
+                console.error(error);
+                mostrarMensaje('❌ Error al exportar', 'error');
+            }
+        }
+
+        // ============================================================
+        // PERSISTENCIA DE DATOS
+        // ============================================================
+
+        function guardarDatos() {
+            try {
+                localStorage.setItem('pdetDatosCompletos', JSON.stringify({
+                    proyectos: baseDeDatosProyectos,
+                    logs: registroControlCambios,
+                    evaluaciones: evaluaciones,
+                    archivos: archivosAdjuntos,
+                    circular: circularActual
+                }));
+            } catch (error) {
+                console.error('Error guardando datos:', error);
+            }
+        }
+
+        function cargarDatosGuardados() {
+            try {
+                const datosStr = localStorage.getItem('pdetDatosCompletos');
+                if (datosStr) {
+                    const datos = JSON.parse(datosStr);
+                    if (datos.proyectos) baseDeDatosProyectos = datos.proyectos;
+                    if (datos.logs) registroControlCambios = datos.logs;
+                    if (datos.evaluaciones) evaluaciones = datos.evaluaciones;
+                    if (datos.archivos) archivosAdjuntos = datos.archivos;
+                    if (datos.circular) {
+                        circularActual = datos.circular;
+                        actualizarVistaCircular();
+                    }
+                    actualizarTabla();
+                    actualizarEvaluaciones();
+                    actualizarArchivos();
+                    actualizarReporte();
+                    cargarCircularInfo();
+                    actualizarSelectDescarga();
+                }
+            } catch (error) {
+                console.error('Error cargando datos:', error);
+            }
+        }
+
+        function mostrarMensaje(mensaje, tipo = 'success') {
+            const colores = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                info: 'bg-blue-500',
+                warning: 'bg-yellow-500'
+            };
+            
+            const div = document.createElement('div');
+            div.className = `notification fixed top-4 right-4 p-4 rounded-lg shadow-xl z-50 ${colores[tipo] || colores.success} text-white font-bold max-w-md text-sm`;
+            div.textContent = mensaje;
+            document.body.appendChild(div);
+            
+            setTimeout(() => {
+                div.style.opacity = '0';
+                div.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => div.remove(), 300);
+            }, 4000);
+        }
+
+        // ============================================================
+        // INICIALIZACIÓN
+        // ============================================================
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const pdetFields = document.getElementById('pdetFields');
+            const inputs = pdetFields.querySelectorAll('input, select');
+            inputs.forEach(el => el.setAttribute('disabled', 'true'));
+            
+            cargarDatosGuardados();
+            
+            document.getElementById('reportFecha').value = new Date().toISOString().split('T')[0];
+            
+            document.addEventListener('click', function(e) {
+                const container = document.querySelector('.autocomplete-container');
+                if (container && !container.contains(e.target)) {
+                    document.getElementById('autocomplete-list').innerHTML = '';
+                }
+            });
+            
+            setInterval(verificarPlazo, 60000);
+        });
+    </script>
+</body>
+</html>
