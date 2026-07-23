@@ -8,36 +8,168 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        /* === TODOS LOS ESTILOS DE TU SISTEMA === */
-        body { background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); min-height: 100vh; }
-        .gradient-card { background: linear-gradient(145deg, #ffffff, #f8fafc); }
-        .transition-all { transition: all 0.3s ease; }
-        .shadow-hover:hover { box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); transform: translateY(-2px); }
-        .badge-cumplio { background: #10b981; color: white; padding: 2px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; }
-        .badge-no-cumplio { background: #ef4444; color: white; padding: 2px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; }
-        .badge-parcial { background: #f59e0b; color: white; padding: 2px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; }
-        .badge-planeacion { background: #1e3a8a; color: white; padding: 2px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; }
-        .badge-sync { background: #059669; color: white; padding: 2px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; }
-        .badge-sync-off { background: #dc2626; color: white; padding: 2px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; }
-        .progress-bar { height: 6px; background: #e5e7eb; border-radius: 10px; overflow: hidden; margin-top: 4px; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #06b6d4); border-radius: 10px; transition: width 0.5s ease; }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        .notification { animation: slideIn 0.3s ease-out; }
-        .tab-active { background: #1e3a8a; color: white; }
-        .tab-inactive { color: #6b7280; }
-        .autocomplete-items { position: absolute; border: 1px solid #d4d4d4; border-bottom: none; border-top: none; z-index: 99; top: 100%; left: 0; right: 0; max-height: 150px; overflow-y: auto; background-color: #fff; border-radius: 0 0 4px 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .autocomplete-items div { padding: 6px 10px; cursor: pointer; background-color: #fff; border-bottom: 1px solid #d4d4d4; font-size: 11px; font-family: monospace; }
-        .autocomplete-items div:hover { background-color: #e9e9e9; }
-        .autocomplete-container { position: relative; }
-        .file-upload-area { border: 2px dashed #cbd5e1; border-radius: 8px; padding: 20px; text-align: center; transition: all 0.3s ease; cursor: pointer; }
-        .file-upload-area:hover { border-color: #3b82f6; background: #f8fafc; }
-        .btn-sync { background: linear-gradient(135deg, #059669, #10b981); transition: all 0.3s ease; }
-        .btn-sync:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(16,185,129,0.4); }
-        .btn-sync:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        .sync-spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #fff; border-top: 2px solid transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .sync-status { font-size: 11px; color: #6b7280; padding: 4px 8px; background: #f3f4f6; border-radius: 20px; }
-        /* === FIN ESTILOS === */
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+            min-height: 100vh;
+        }
+        .gradient-card {
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+        }
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+        .shadow-hover:hover {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+        .badge-cumplio {
+            background: #10b981;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .badge-no-cumplio {
+            background: #ef4444;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .badge-parcial {
+            background: #f59e0b;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .badge-planeacion {
+            background: #1e3a8a;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .badge-sync {
+            background: #059669;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .badge-sync-off {
+            background: #dc2626;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .progress-bar {
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #06b6d4);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .notification {
+            animation: slideIn 0.3s ease-out;
+        }
+        .tab-active {
+            background: #1e3a8a;
+            color: white;
+        }
+        .tab-inactive {
+            color: #6b7280;
+        }
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid #d4d4d4;
+            border-bottom: none;
+            border-top: none;
+            z-index: 99;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 150px;
+            overflow-y: auto;
+            background-color: #fff;
+            border-radius: 0 0 4px 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .autocomplete-items div {
+            padding: 6px 10px;
+            cursor: pointer;
+            background-color: #fff;
+            border-bottom: 1px solid #d4d4d4;
+            font-size: 11px;
+            font-family: monospace;
+        }
+        .autocomplete-items div:hover {
+            background-color: #e9e9e9;
+        }
+        .autocomplete-container {
+            position: relative;
+        }
+        .file-upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .file-upload-area:hover {
+            border-color: #3b82f6;
+            background: #f8fafc;
+        }
+        .btn-sync {
+            background: linear-gradient(135deg, #059669, #10b981);
+            transition: all 0.3s ease;
+        }
+        .btn-sync:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(16,185,129,0.4);
+        }
+        .btn-sync:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .sync-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #fff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .sync-status {
+            font-size: 11px;
+            color: #6b7280;
+            padding: 4px 8px;
+            background: #f3f4f6;
+            border-radius: 20px;
+        }
     </style>
 </head>
 <body class="p-4 md:p-8 text-gray-800 font-sans">
@@ -70,7 +202,7 @@
         <div class="bg-gradient-to-r from-blue-900 to-teal-700 p-6 text-white border-b-4 border-yellow-500 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
                 <h1 class="text-2xl md:text-3xl font-extrabold tracking-wider uppercase">Gobernación del Putumayo</h1>
-                <p class="text-sm opacity-90 mt-1">Sistema de Seguimiento y Evaluación - Acuerdo Final de Paz</p>
+                <p class="text-sm opacity-90 mt-1">Sistema de Seguimiento y Evaluación - Acuerdo Final de Paz (3,440 Iniciativas PDET)</p>
             </div>
             <div class="flex gap-3 items-center flex-wrap">
                 <div class="bg-blue-950/50 p-3 rounded-xl border border-teal-500/30 text-right text-xs">
@@ -261,15 +393,14 @@
                 </div>
             </div>
 
-            <!-- RESTANTES TABS (Circular, Evaluación, Reportes, Archivos) -->
-            <!-- [ESTA SECCIÓN ES LA MISMA QUE TU VERSIÓN ANTERIOR - SE INCLUYE COMPLETA EN EL CÓDIGO FINAL] -->
-            <!-- Por simplicidad, se incluyen los tabs básicos -->
-
             <!-- TAB 2: CIRCULAR -->
             <div id="contentCircular" class="hidden">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div id="circularGestion" class="gradient-card p-6 rounded-xl border border-gray-200">
-                        <h2 class="text-lg font-bold text-blue-950 mb-4 flex items-center gap-2"><span>📄</span> Gestión de Circular</h2>
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-bold text-blue-950 flex items-center gap-2"><span>📄</span> Gestión de Circular</h2>
+                            <span id="permisoPlaneacionBadge" class="badge-planeacion text-xs">🔒 Solo Planeación</span>
+                        </div>
                         <div id="circularForm" class="space-y-4">
                             <div><label class="block text-xs font-bold uppercase text-gray-600 mb-1">Número de Circular</label><input type="text" id="numCircular" placeholder="Ej: CIRCULAR-001-2026" class="w-full p-2 border border-gray-300 rounded-md text-sm font-mono"></div>
                             <div><label class="block text-xs font-bold uppercase text-gray-600 mb-1">Fecha de Emisión</label><input type="date" id="fechaCircular" class="w-full p-2 border border-gray-300 rounded-md text-sm"></div>
@@ -393,7 +524,7 @@
         // ============================================================
         // CONFIGURACIÓN - REEMPLAZA CON TU URL DE GOOGLE APPS SCRIPT
         // ============================================================
-        const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbx_o55W8zvbJxG_3Q0b-gzOWBshHhlSBadeKoed7qRUPCEOwo17IY7xrpzD3rTLbrPl/exec'; // 👈 REEMPLAZA CON TU URL
+        const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbx_o55W8zvbJxG_3Q0b-gzOWBshHhlSBadeKoed7qRUPCEOwo17IY7xrpzD3rTLbrPl/exec';
 
         // ============================================================
         // VARIABLES GLOBALES
