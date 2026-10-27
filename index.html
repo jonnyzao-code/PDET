@@ -4,51 +4,30 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sistema Integral PDET - Gobernación del Putumayo</title>
-  <meta name="description" content="Acceso al Sistema Integral de Seguimiento, Evaluación y Control PDET de la Gobernación del Putumayo.">
+  <meta name="description" content="Sistema Integral de Seguimiento, Evaluación y Control PDET de la Gobernación del Putumayo.">
   <style>
-    :root { --azul: #1e3a8a; --verde: #115e59; --oro: #eab308; }
-    * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 24px 16px; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #0f172a; background: linear-gradient(135deg, #0f172a 0%, var(--azul) 100%); }
-    .tarjeta { width: 100%; max-width: 460px; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,.35); }
-    .cabecera { background: linear-gradient(90deg, var(--azul), var(--verde)); color: #fff; text-align: center; padding: 22px 16px; border-bottom: 4px solid var(--oro); }
-    .cabecera h1 { margin: 0; font-size: 18px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; }
-    .cabecera p { margin: 4px 0 0; font-size: 12px; opacity: .85; }
-    .cuerpo { padding: 24px; }
-    .cuerpo h2 { margin: 0 0 8px; font-size: 20px; }
-    .cuerpo p { margin: 0 0 20px; font-size: 14px; color: #475569; line-height: 1.5; }
-    .boton { display: block; text-align: center; background: var(--azul); color: #fff; text-decoration: none; font-weight: 600; padding: 12px; border-radius: 10px; }
-    .boton:hover, .boton:focus-visible { background: #172554; outline: 3px solid var(--oro); outline-offset: 2px; }
-    ul { margin: 20px 0 0; padding-left: 18px; font-size: 13px; color: #475569; line-height: 1.7; }
-    footer { font-size: 12px; color: rgba(255,255,255,.75); text-align: center; }
-    footer a { color: inherit; }
+    html, body { margin: 0; height: 100%; background: #0f172a; }
+    iframe { display: block; width: 100%; height: 100vh; height: 100dvh; border: 0; }
+    noscript { display: block; padding: 24px; color: #fff; font-family: system-ui, sans-serif; }
+    noscript a { color: #eab308; }
   </style>
 </head>
 <body>
-  <main class="tarjeta">
-    <div class="cabecera">
-      <h1>Gobernación del Putumayo</h1>
-      <p>Secretaría de Planeación Departamental</p>
-    </div>
-    <div class="cuerpo">
-      <h2>Sistema Integral PDET</h2>
-      <p>Seguimiento, evaluación y control de las iniciativas PDET. Acceso restringido a servidores públicos autorizados con su correo institucional.</p>
-      <a id="ingresar" class="boton" href="#">Ingresar al Sistema PDET</a>
-      <ul>
-        <li>Proyectos e iniciativas PDET y POAI</li>
-        <li>Evaluación y control de dependencias</li>
-        <li>Reportes, analítica e informes en Excel y PDF</li>
-        <li>Circulares, documentos y bitácora de auditoría</li>
-      </ul>
-    </div>
-  </main>
-  <footer>
-    Desarrollado y alojado por <a href="https://www.dominetsas.com">DOMINET S.A.S.</a> ·
-    <a href="https://www.dominetsas.com/emisoradominet/">📻 Dominet Estéreo</a>
-  </footer>
+  <!--
+    El Sistema PDET se muestra completo dentro de esta página, de modo que la
+    dirección visible sigue siendo https://www.dominetsas.com/pdet/.
+    Si la aplicación se publica en otra dirección (p. ej. https://pdet.dominetsas.com),
+    cambia solo URL_APP.
+  -->
+  <iframe id="sistema" title="Sistema Integral PDET - Gobernación del Putumayo"
+          allow="clipboard-write; fullscreen" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+  <noscript>
+    Este sistema requiere JavaScript.
+    <a href="https://project--50bebffc-27b2-45c1-bae3-596d4af06634.lovable.app/auth">Abrir el Sistema PDET</a>
+  </noscript>
   <script>
-    // Dirección publicada de la aplicación (cámbiala si se usa un dominio propio, p. ej. https://pdet.dominetsas.com).
     var URL_APP = "https://project--50bebffc-27b2-45c1-bae3-596d4af06634.lovable.app/auth";
-    document.getElementById("ingresar").href = URL_APP;
+    document.getElementById("sistema").src = URL_APP;
   </script>
 </body>
 </html>
