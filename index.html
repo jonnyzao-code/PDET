@@ -1,269 +1,54 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Integral PDET - Gobernación del Putumayo</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <style>
-        /* [ESTILOS - MANTENER TUS ESTILOS ACTUALES] */
-        body { background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); min-height: 100vh; }
-        .gradient-card { background: linear-gradient(145deg, #ffffff, #f8fafc); }
-        /* ... resto de estilos ... */
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema Integral PDET - Gobernación del Putumayo</title>
+  <meta name="description" content="Acceso al Sistema Integral de Seguimiento, Evaluación y Control PDET de la Gobernación del Putumayo.">
+  <style>
+    :root { --azul: #1e3a8a; --verde: #115e59; --oro: #eab308; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 24px 16px; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #0f172a; background: linear-gradient(135deg, #0f172a 0%, var(--azul) 100%); }
+    .tarjeta { width: 100%; max-width: 460px; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,.35); }
+    .cabecera { background: linear-gradient(90deg, var(--azul), var(--verde)); color: #fff; text-align: center; padding: 22px 16px; border-bottom: 4px solid var(--oro); }
+    .cabecera h1 { margin: 0; font-size: 18px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; }
+    .cabecera p { margin: 4px 0 0; font-size: 12px; opacity: .85; }
+    .cuerpo { padding: 24px; }
+    .cuerpo h2 { margin: 0 0 8px; font-size: 20px; }
+    .cuerpo p { margin: 0 0 20px; font-size: 14px; color: #475569; line-height: 1.5; }
+    .boton { display: block; text-align: center; background: var(--azul); color: #fff; text-decoration: none; font-weight: 600; padding: 12px; border-radius: 10px; }
+    .boton:hover, .boton:focus-visible { background: #172554; outline: 3px solid var(--oro); outline-offset: 2px; }
+    ul { margin: 20px 0 0; padding-left: 18px; font-size: 13px; color: #475569; line-height: 1.7; }
+    footer { font-size: 12px; color: rgba(255,255,255,.75); text-align: center; }
+    footer a { color: inherit; }
+  </style>
 </head>
-<body class="p-4 md:p-8 text-gray-800 font-sans">
-
-    <!-- PANTALLA DE LOGIN -->
-    <div id="loginSection" class="max-w-md mx-auto my-20 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
-        <div class="bg-gradient-to-r from-blue-900 to-teal-800 p-6 text-white text-center border-b-4 border-yellow-500">
-            <h2 class="text-xl font-black uppercase tracking-wider">Gobernación del Putumayo</h2>
-            <p class="text-xs opacity-80 mt-1">Sistema Integral de Seguimiento y Evaluación PDET</p>
-        </div>
-        <form onsubmit="procesarLogin(event)" class="p-6 space-y-4">
-            <div>
-                <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Usuario</label>
-                <input type="text" id="loginUser" required placeholder="Usuario" class="w-full p-2.5 border-2 border-gray-300 rounded-lg outline-none focus:border-teal-600 transition-all font-mono">
-            </div>
-            <div>
-                <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Contraseña</label>
-                <input type="password" id="loginPass" required placeholder="••••••••" class="w-full p-2.5 border-2 border-gray-300 rounded-lg outline-none focus:border-teal-600 transition-all">
-            </div>
-            <div id="loginError" class="text-xs text-red-600 font-bold hidden">⚠️ Credenciales incorrectas.</div>
-            <button type="submit" class="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-lg transition-all shadow-md">
-                Ingresar al Sistema
-            </button>
-        </form>
+<body>
+  <main class="tarjeta">
+    <div class="cabecera">
+      <h1>Gobernación del Putumayo</h1>
+      <p>Secretaría de Planeación Departamental</p>
     </div>
-
-    <!-- PANEL PRINCIPAL -->
-    <div id="mainDashboard" class="max-w-7xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden hidden">
-        <!-- [TU HTML COMPLETO AQUÍ - MANTENER TUS ELEMENTOS] -->
-        <!-- ... -->
+    <div class="cuerpo">
+      <h2>Sistema Integral PDET</h2>
+      <p>Seguimiento, evaluación y control de las iniciativas PDET. Acceso restringido a servidores públicos autorizados con su correo institucional.</p>
+      <a id="ingresar" class="boton" href="#">Ingresar al Sistema PDET</a>
+      <ul>
+        <li>Proyectos e iniciativas PDET y POAI</li>
+        <li>Evaluación y control de dependencias</li>
+        <li>Reportes, analítica e informes en Excel y PDF</li>
+        <li>Circulares, documentos y bitácora de auditoría</li>
+      </ul>
     </div>
-
-    <script>
-        // ============================================================
-        // CONFIGURACIÓN - ACTUALIZAR CON TU URL
-        // ============================================================
-        const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbwIJ6T6c9ASeNJMxHqrRIbcI1nvH-McAT9YKFq2L2VLlBSwZsj5mPmISKAuYeQEG9gg/exec';
-
-        // ============================================================
-        // FUNCIONES DE SINCRONIZACIÓN
-        // ============================================================
-        async function descargarDeGoogleSheets() {
-            try {
-                const response = await fetch(`${GOOGLE_SHEETS_URL}?t=${Date.now()}`);
-                if (!response.ok) throw new Error('Error en la respuesta del servidor');
-                const data = await response.json();
-                if (data.error) throw new Error(data.error);
-                
-                if (data.proyectos && data.proyectos.length > 0) {
-                    const headers = data.proyectos[0];
-                    const rows = data.proyectos.slice(1);
-                    baseDeDatosProyectos = rows.map(row => {
-                        const proyecto = {};
-                        headers.forEach((header, index) => {
-                            const key = header.toLowerCase().replace(/ /g, '_');
-                            proyecto[key] = row[index] || '';
-                        });
-                        return proyecto;
-                    });
-                }
-                
-                if (data.evaluaciones && data.evaluaciones.length > 0) {
-                    const headers = data.evaluaciones[0];
-                    const rows = data.evaluaciones.slice(1);
-                    evaluaciones = rows.map(row => {
-                        const evaluacion = {};
-                        headers.forEach((header, index) => {
-                            const key = header.toLowerCase().replace(/ /g, '_');
-                            evaluacion[key] = row[index] || '';
-                        });
-                        return evaluacion;
-                    });
-                }
-                
-                if (data.circular && data.circular.length > 0) {
-                    const rows = data.circular.slice(1);
-                    if (rows.length > 0) {
-                        const row = rows[0];
-                        circularActual = {
-                            numero: row[0] || '',
-                            fecha: row[1] || '',
-                            asunto: row[2] || '',
-                            descripcion: row[3] || '',
-                            fechaLimite: row[4] || '',
-                            publicada: row[5] || ''
-                        };
-                    }
-                }
-                
-                actualizarTabla();
-                actualizarEvaluaciones();
-                actualizarReporte();
-                cargarCircularInfo();
-                guardarDatos();
-                return true;
-            } catch (error) {
-                console.error('❌ Error descargando:', error);
-                return false;
-            }
-        }
-
-        async function subirAGSheets(mostrarMensaje = true) {
-            try {
-                const proyectosHeaders = ['BPIN', 'Proyecto', 'Secretaría', 'Presupuesto', 'Fuentes', 'Ejecutado', '% Ejecución', 'Punto Acuerdo', 'Pilar PDET', 'Código Iniciativa'];
-                const proyectosData = [proyectosHeaders];
-                baseDeDatosProyectos.forEach(p => {
-                    proyectosData.push([
-                        p.bpin || '',
-                        p.nombreProyecto || '',
-                        p.secretaria || '',
-                        p.presupuesto || 0,
-                        p.fuentes || '',
-                        p.ejecutado || 'No',
-                        p.porcentajeEjecucion || 0,
-                        p.puntoAcuerdo || '',
-                        p.pilarPdet || '',
-                        p.codigoIniciativa || ''
-                    ]);
-                });
-                
-                const evalHeaders = ['Secretaría', 'Estado', 'Observaciones', 'Fecha', 'Evaluado Por'];
-                const evalData = [evalHeaders];
-                evaluaciones.forEach(e => {
-                    evalData.push([
-                        e.secretaria || '',
-                        e.estado || '',
-                        e.observaciones || '',
-                        e.fecha || '',
-                        e.evaluadoPor || ''
-                    ]);
-                });
-                
-                const circularData = [['Circular', 'Fecha', 'Asunto', 'Descripción', 'Fecha Límite', 'Publicada']];
-                if (circularActual) {
-                    circularData.push([
-                        circularActual.numero || '',
-                        circularActual.fecha || '',
-                        circularActual.asunto || '',
-                        circularActual.descripcion || '',
-                        circularActual.fechaLimite || '',
-                        circularActual.publicada || ''
-                    ]);
-                }
-                
-                const payload = { proyectos: proyectosData, evaluaciones: evalData, circular: circularData };
-                const response = await fetch(GOOGLE_SHEETS_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                
-                const result = await response.json();
-                if (result.success) {
-                    if (mostrarMensaje) mostrarMensaje('✅ Datos subidos a Google Sheets', 'success');
-                    return true;
-                } else {
-                    throw new Error(result.error || 'Error al subir');
-                }
-            } catch (error) {
-                console.error('❌ Error subiendo:', error);
-                if (mostrarMensaje) mostrarMensaje(`❌ Error: ${error.message}`, 'error');
-                return false;
-            }
-        }
-
-        async function sincronizarAutomaticamente() {
-            console.log('🔄 Sincronizando automáticamente...');
-            const success = await descargarDeGoogleSheets();
-            if (!success) {
-                console.log('⚠️ Usando datos locales');
-                cargarDatosGuardados();
-                actualizarTabla();
-                actualizarEvaluaciones();
-                actualizarReporte();
-                cargarCircularInfo();
-            }
-        }
-
-        async function sincronizarManual() {
-            if (isSyncing) return;
-            isSyncing = true;
-            const btn = document.getElementById('btnSyncSheets');
-            if (btn) {
-                btn.disabled = true;
-                btn.innerHTML = '<span class="sync-spinner"></span> Sincronizando...';
-            }
-            try {
-                await subirAGSheets(false);
-                await descargarDeGoogleSheets();
-                mostrarMensaje('✅ Sincronización completada', 'success');
-            } catch (error) {
-                mostrarMensaje(`❌ Error: ${error.message}`, 'error');
-            }
-            if (btn) {
-                btn.innerHTML = '<span>🔄</span> Sincronizar con Google Sheets';
-                btn.disabled = false;
-            }
-            isSyncing = false;
-        }
-
-        // ============================================================
-        // FUNCIONES DE LOGIN Y SESIÓN
-        // ============================================================
-        function procesarLogin(e) {
-            e.preventDefault();
-            const userIn = document.getElementById('loginUser').value.trim().toUpperCase();
-            const passIn = document.getElementById('loginPass').value;
-            const errorLabel = document.getElementById('loginError');
-
-            if (usuariosSistema[userIn] && usuariosSistema[userIn].pass === passIn) {
-                currentUser = userIn;
-                currentSecretaria = usuariosSistema[userIn].sec;
-                esPlaneacion = (currentSecretaria === 'PLANEACION');
-                currentRole = esPlaneacion ? 'PLANEACION' : 'SECRETARIA';
-
-                errorLabel.classList.add('hidden');
-                document.getElementById('loginSection').classList.add('hidden');
-                document.getElementById('mainDashboard').classList.remove('hidden');
-
-                document.getElementById('sessionRole').innerText = currentRole;
-                document.getElementById('sessionUser').innerText = currentUser;
-                document.getElementById('sessionSec').innerText = currentSecretaria;
-
-                configurarPermisos();
-                registrarLog(currentSecretaria, currentUser, "Inicio de sesión autorizado");
-                sincronizarAutomaticamente();
-                document.getElementById('pdetForm').reset();
-                togglePdetFields();
-            } else {
-                errorLabel.classList.remove('hidden');
-            }
-        }
-
-        // [TODAS LAS DEMÁS FUNCIONES - ACTUALIZAR TABLA, EVALUACIONES, REPORTES, ETC.]
-        // ... (mantén tus funciones existentes)
-
-        // ============================================================
-        // INICIALIZACIÓN
-        // ============================================================
-        document.addEventListener('DOMContentLoaded', function() {
-            const pdetFields = document.getElementById('pdetFields');
-            if (pdetFields) {
-                const inputs = pdetFields.querySelectorAll('input, select');
-                inputs.forEach(el => el.setAttribute('disabled', 'true'));
-            }
-            cargarDatosGuardados();
-            document.getElementById('reportFecha').value = new Date().toISOString().split('T')[0];
-            setInterval(() => {
-                if (currentUser) sincronizarAutomaticamente();
-            }, 300000);
-            setInterval(verificarPlazo, 60000);
-        });
-    </script>
+  </main>
+  <footer>
+    Desarrollado y alojado por <a href="https://www.dominetsas.com">DOMINET S.A.S.</a> ·
+    <a href="https://www.dominetsas.com/emisoradominet/">📻 Dominet Estéreo</a>
+  </footer>
+  <script>
+    // Dirección publicada de la aplicación (cámbiala si se usa un dominio propio, p. ej. https://pdet.dominetsas.com).
+    var URL_APP = "https://project--50bebffc-27b2-45c1-bae3-596d4af06634.lovable.app/auth";
+    document.getElementById("ingresar").href = URL_APP;
+  </script>
 </body>
 </html>
